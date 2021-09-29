@@ -1,0 +1,111 @@
+{% extends 'tracker.html' %}
+
+{% block header %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="accordion accordion-flush">
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#specimen_view">Specimen</button><br>
+            <div class="collapse show" id="specimen_view">
+                <form action="{{ url_for('tracker.specimen_update', specimen_id=specimen_dict['specimen_id']) }}">
+                    <input type="submit" class="btn btn-primary btn-sm" value="Edit" />
+                </form>
+                
+                <br>
+
+                <table class="table table-striped text-left">
+                    <tr>
+                        <td>Specimen ID</td>
+                        <td>{{ specimen_dict['specimen_id'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Experiment</td>
+                        <td>{{ specimen_dict['experiment'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pedigree</td>
+                        <td>{{ specimen_dict['pedigree'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Sex</td>
+                        <td>{{ specimen_dict['sex'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Date of Birth</td>
+                        {% if specimen_dict['dob'] is string %}
+                        <td>{{ specimen_dict['dob'] }}</td>
+                        {% else %}
+                        <td>{{ specimen_dict['dob'].strftime('%m/%d/%y') }}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <td>Perfusion Date</td>
+                        {% if specimen_dict['perfusion_date'] is string %}
+                        <td>{{ specimen_dict['perfusion_date'] }}</td>
+                        {% else %}
+                        <td>{{ specimen_dict['perfusion_date'].strftime('%m/%d/%y') }}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <td>Perfusion Age</td>
+                        <td>{{ specimen_dict['perfusion_age'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Perfusion Notes</td>
+                        <td>{{ specimen_dict['perfusion_notes'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>{{ specimen_dict['status'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Notes</td>
+                        <td>{{ specimen_dict['notes'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Number of Sections</td>
+                        <td>{{ specimen_dict['no_of_sections'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Date Added</td>
+                        <td>{{ specimen_dict['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Modified</td>
+                        <td>{{ specimen_dict['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br>
+        
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#section_table_div">Sections</button><br>
+            <div class="collapse show" id="section_table_div">
+                {% include "section/table.html" %}
+            </div>
+        </div>
+
+        <br>
+        
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#session_table_div">Imaging Sessions</button><br>
+            <div class="collapse show" id="session_table_div">
+                {% include "session/table.html" %}
+            </div>
+        </div>
+
+        <br>
+
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#specimen_viz_tools">Visualization Tools</button><br>
+            <div class="collapse show" id="specimen_viz_tools">
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

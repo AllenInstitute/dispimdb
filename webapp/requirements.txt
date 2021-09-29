@@ -1,0 +1,10 @@
+bokeh
+flask
+flask_wtf
+imageio
+gunicorn
+matplotlib
+numpy
+pymongo
+scipy
+supervisor

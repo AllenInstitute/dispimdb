@@ -1,0 +1,45 @@
+<form method="post" enctype="multipart/form-data">
+  <div class="form-group">
+    <label for="section_num">Section ID</label>
+    <input name="section_num" id="section_num" class="form-control" 
+      value="{{ section_dict['section_num'] }}" required>
+
+    <label for="specimen_id">Specimen ID</label>
+    <select name="specimen_id" id="specimen_id" class="form-control">
+      {% for specimen_id in specimen_ids %}
+        <option value="{{ specimen_id }}" {% if section_dict["specimen_id"] == specimen_id %}selected{% endif %}>
+          {{ specimen_id }}
+        </option>
+      {% endfor %}
+      <option value="None" {% if section_dict["specimen_id"] == "None" %}selected{% endif %}>
+        None
+      </option>
+    </select>
+
+    <label for="cut_plane">Cut Plane</label>
+    <input name="cut_plane" id="cut_plane" class="form-control"
+      value="{{ section_dict['cut_plane'] }}">
+
+    <label for="thickness">Thickness</label>
+    <input name="thickness" id="thickness" class="form-control"
+      value="{{ section_dict['thickness'] }}">
+
+    <label for="prep_type">Prep Type</label>
+    <input name="prep_type" id="prep_type" class="form-control"
+      value="{{ section_dict['prep_type'] }}">
+
+    <label for="fluorescent_labels">Fluorescent Labels</label>
+    <input name="fluorescent_labels" id="fluorescent_labels" class="form-control"
+      value="{{ section_dict['fluorescent_labels'] }}">
+
+    <label for="other_notes">Other Notes</label>
+    <textarea name="other_notes" id="other_notes" class="form-control" rows="2">{{ section_dict['other_notes'] }}</textarea>
+
+    <label for="image_files">Upload Image</label>
+    <input type="file" name="image_files" class="form-control" multiple>
+
+    <br>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>

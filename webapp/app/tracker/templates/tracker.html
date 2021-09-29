@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Specimen Tracker</a>
+    <div class="collapse navbar-collapse ms-auto">
+      <ul class="navbar-nav mb-2 mb-md-0">
+        <li class="nav-item">
+          <select name="projects" id="projects" class="form-select form-select-sm"
+            style="margin-left:10px">
+            {% for project in project_list %}
+              <option value="{{ project }}">{{ project }}</option>
+            {% endfor %}
+          </select>
+        </li>
+
+        <li class="nav-item">
+          <a class="btn btn-primary btn-sm" id="project_button"
+            href="{{ url_for('tracker.project_view', project_id='project_id') }}"
+            role="button" style="margin-left:20px">View Project</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var selected_project = $('#projects').val();
+      var project_url = $('#project_button').attr('href').split("/");
+      project_url[project_url.length - 1] = selected_project;
+      project_url = project_url.join("/");
+      $('#project_button').attr('href', project_url);
+    
+      $('#projects').change(function() {
+        var selected_project = $('#projects').val();
+        var project_url = $('#project_button').attr('href').split("/");
+        project_url[project_url.length - 1] = selected_project;
+        project_url = project_url.join("/");
+        $('#project_button').attr('href', project_url);
+        console.log(project_url);
+      });
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+{% endblock %}

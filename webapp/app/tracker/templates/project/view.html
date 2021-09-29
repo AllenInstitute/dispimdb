@@ -1,0 +1,56 @@
+{% extends 'tracker.html' %}
+
+{% block header %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('tracker.project_update', project_id=project_json['project_id']) }}">
+        <input type="submit" class="btn btn-primary btn-sm" value="Edit" />
+    </form>
+
+    <br>
+
+    <table class="table table-striped text-left">
+        <tr>
+            <td>Project ID</td>
+            <td>{{ project_json['project_id'] }}</td>
+        </tr>
+        <tr>
+            <td>Lab Lead</td>
+            <td>{{ project_json['lab_lead'] }}</td>
+        </tr>
+        <tr>
+            <td>Description</td>
+            <td>{{ project_json['description'] }}</td>
+        </tr>
+        <tr>
+            <td>Notes</td>
+            <td>{{ project_json['notes'] }}</td>
+        </tr>
+        <tr>
+            <td>Added By</td>
+            <td>{{ project_json['added_by'] }}</td>
+        </tr>
+        <tr>
+            <td>Date Added</td>
+            <td>{{ project_json['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+        </tr>
+        <tr>
+            <td>Last Modified By</td>
+            <td>{{ project_json['modified_by'] }}</td>
+        </tr>
+        <tr>
+            <td>Last Modified</td>
+            <td>{{ project_json['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+        </tr>
+    </table>
+
+    <hr>
+
+    {% include "specimen/table.html" %}
+
+    <hr>
+
+    <h4>Visualization Tools</h4>
+{% endblock %}

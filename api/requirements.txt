@@ -1,0 +1,8 @@
+aiofiles
+fastapi
+gunicorn
+numpy
+pydantic
+pymongo
+scipy
+uvicorn

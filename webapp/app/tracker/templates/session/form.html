@@ -1,0 +1,140 @@
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="session_id">Session ID</label>
+      <input name="session_id" id="session_id" class="form-control"
+        value="{{ session_dict['session_id'] }}" required
+        {% if session_dict["session_id"] != "" %}readonly{% endif %}>
+
+      <label for="specimen_id">Specimen ID</label>
+      <select name="specimen_id" id="specimen_id" class="form-control">
+        {% for specimen_id in specimen_ids %}
+          <option value="{{ specimen_id }}" {% if session_dict["specimen_id"] == specimen_id %}selected{% endif %}>
+            {{ specimen_id }}
+          </option>
+        {% endfor %}
+        <option value="None" {% if session_dict["specimen_id"] == "None" %}selected{% endif %}>
+          None
+        </option>
+      </select>
+
+      <label for="section_ids">Section IDs (use comma to separate)</label>
+      <input name="section_ids" id="section_ids" class="form-control"
+        value="{{ session_dict['section_ids']|join(', ') }}">
+
+      <label for="imaging_date">Imaging Date (mm/dd/yy)</label>
+      <input name="imaging_date" id="imaging_date" class="form-control"
+        value="{{ session_dict['imaging_date'] }}">
+
+      <label for="scope">Scope</label>
+      <input name="scope" id="scope" class="form-control"
+        value="{{ session_dict['scope'] }}">
+
+      <label for="objective">Objective</label>
+      <input name="objective" id="objective" class="form-control"
+        value="{{ session_dict['objective'] }}">
+
+      <label for="objective_angle">Objective Angle</label>
+      <input name="objective_angle" id="objective_angle" class="form-control"
+        value="{{ session_dict['objective_angle'] }}">
+
+      <label for="imaging_bath">Imaging Bath</label>
+      <input name="imaging_bath" id="imaging_bath" class="form-control"
+        value="{{ session_dict['imaging_bath'] }}">
+
+      <label for="laser_power">Laser Power</label>
+      <input name="laser_power" id="laser_power" class="form-control" rows="2"
+        value="{{ session_dict['laser_power'] }}">
+
+      <label for="session_config">Session Configuration</label>
+      <select name="session_config_select" id="session_config_select" class="form-control">
+        {% for session_config in dropdown_dict["session_config"] %}
+          <option value="{{ session_config }}" {% if session_dict["session_config"] == session_config %}selected{% endif %}>{{ session_config }}</option>
+        {% endfor %}
+        <option value="new_session_config">...New session_config...</option>
+      </select>
+      <input name="session_config_input" id="session_config_input" class="form-control"
+        value="{{ session_dict['session_config'] }}">
+
+      <label for="magnification_factor">Magnification Factor</label>
+      <input name="magnification_factor" id="magnification_factor" value="" class="form-control">
+
+      <label for="pixel_size">Pixel Size</label>
+      <input name="pixel_size" id="pixel_size" value="" class="form-control">
+
+      <label for="stage_angle">Stage Angle</label>
+      <input name="stage_angle" id="stage_angle" value="" class="form-control">
+
+      <label for="raw_tiff_path">Raw TIFF Path</label>
+      <input name="raw_tiff_path" id="raw_tiff_path" class="form-control"
+        value="{{ session_dict['raw_tiff_path'] }}">
+
+      <label for="gif_path">GIF Path</label>
+      <input name="gif_path" id="gif_path" class="form-control"
+        value="{{ session_dict['gif_path'] }}">
+
+      <label for="notes">Notes</label>
+      <textarea name="notes" id="notes" class="form-control" rows="2">
+        {{ session_dict['notes'] }}
+      </textarea>
+
+      <label for="image_files">Upload Image</label>
+      <input type="file" name="image_files" class="form-control" multiple>
+
+      <br>
+
+      <button type="submit" class="btn btn-default">Submit</button>
+    </div>
+  </form>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var session_configs = JSON.parse('{{ session_config_list | tojson | safe }}');
+      var found = session_configs.find(config => config.config_id == "{{ session_dict['session_config'] }}");
+      
+      var selected_config = $("#session_config_select").val();
+
+      if (selected_config == "new_session_config") {
+        $("#session_config_input").show();
+        $("#magnification_factor").val("");
+        $("#magnification_factor").prop("readonly", false);
+        $("#pixel_size").val("");
+        $("#pixel_size").prop("readonly", false);
+        $("#stage_angle").val("");
+        $("#stage_angle").prop("readonly", false);
+      } else {
+        var config_data = session_configs.find(config => config.config_id == selected_config);
+        $("#session_config_input").hide();
+        $("#magnification_factor").val(config_data.magnification_factor);
+        $("#magnification_factor").prop("readonly", true);
+        $("#pixel_size").val(config_data.pixel_size);
+        $("#pixel_size").prop("readonly", true);
+        $("#stage_angle").val(config_data.stage_angle);
+        $("#stage_angle").prop("readonly", true);
+      }
+
+      $("#session_config_select").change(function() {
+        var selected_config = $("#session_config_select").val();
+
+        if (selected_config == "new_session_config") {
+          $("#session_config_input").show();
+          $("#session_config_input").prop("required", true);
+          $("#magnification_factor").val("");
+          $("#magnification_factor").prop("readonly", false);
+          $("#pixel_size").val("");
+          $("#pixel_size").prop("readonly", false);
+          $("#stage_angle").val("");
+          $("#stage_angle").prop("readonly", false);
+        } else {
+          var config_data = session_configs.find(config => config.config_id == selected_config);
+          $("#session_config_input").hide();
+          $("#session_config_input").prop("required", false);
+          $("#magnification_factor").val(config_data.magnification_factor);
+          $("#magnification_factor").prop("readonly", true);
+          $("#pixel_size").val(config_data.pixel_size);
+          $("#pixel_size").prop("readonly", true);
+          $("#stage_angle").val(config_data.stage_angle);
+          $("#stage_angle").prop("readonly", true);
+        }
+      });
+    });
+  </script>

@@ -1,0 +1,86 @@
+{% extends 'tracker.html' %}
+
+{% block header %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="accordion accordion-flush">
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#section_view">Section</button><br>
+            <div class="collapse show" id="section_view">
+                <form action="{{ url_for('tracker.section_update', specimen_id=section_dict['specimen_id'], section_num=section_dict['section_num']) }}">
+                    <input type="submit" class="btn btn-primary btn-sm" value="Edit" />
+                </form>
+
+                <br>
+
+                <table class="table table-striped text-left">
+                    <tr>
+                        <td>Specimen ID</td>
+                        <td>{{ section_dict['specimen_id'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Section Number</td>
+                        <td>{{ section_dict['section_num'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Cut Plane</td>
+                        <td>{{ section_dict['cut_plane'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td>{{ section_dict['thickness'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Prep Type</td>
+                        <td>{{ section_dict['prep_type'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Fluorescent Labels</td>
+                        <td>{{ section_dict['fluorescent_labels'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Other Notes</td>
+                        <td>{{ section_dict['other_notes'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Added By</td>
+                        <td>{{ section_dict['added_by'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Date Added</td>
+                        <td>{{ section_dict['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Modified By</td>
+                        <td>{{ section_dict['modified_by'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Modified</td>
+                        <td>{{ section_dict['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#session_table_div">Imaging Sessions</button><br>
+            <div class="collapse show" id="session_table_div">
+
+            </div>
+        </div>
+
+        <br>
+
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#section_viz_tools">Visualization Tools</button><br>
+            <div class="collapse show" id="section_viz_tools">
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

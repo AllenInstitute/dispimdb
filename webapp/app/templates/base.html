@@ -1,0 +1,71 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - AC Workflow Manager</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+<script src="{{ url_for('static', filename='dt.js') }}"></script>
+
+<header>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" style="padding-top:4%">
+    {% block header %}{% endblock %}
+  </nav>
+
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">AC Workflow</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link" href="#">Tasks</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('tracker.home') }}">Tracker</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('viz.bokehplot') }}">Visualization</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('viz.webgl') }}">WebGL</a>
+          </li>
+        </ul>
+        <span>
+          <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          {% if g.user %}
+            <li class="nav-item">
+              <a class="nav-link disabled">Logged in as <b>{{ g.user }}</b></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth.logout') }}">Log Out</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth.login') }}">Log In</a>
+            </li>
+          {% endif %}
+          </ul>
+        </span>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<body>
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+  
+  <article class="full-height">
+    {% block content %}{% endblock %}
+  </article>
+</body>

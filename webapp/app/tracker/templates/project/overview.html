@@ -1,0 +1,69 @@
+{% extends 'tracker.html' %}
+
+{% block header %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+
+  <form action="{{ url_for('tracker.project_update') }}">
+    <input type="submit" class="btn btn-primary btn-sm" value="Insert New Project" />
+  </form>
+
+  <br>
+
+  <table id="project_table" class="table table-striped table-hover" style="width:100%">
+    <thead id="project_table_head" class="table-dark">
+      <tr>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th scope="col">project_id</th>
+          <th scope="col">lab_lead</th>
+          <th scope="col">description</th>
+          <th scope="col">date_added</th>
+          <th scope="col">last_modified</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for project in project_list %}
+      <tr>
+        <td>
+          <form action="{{ url_for('tracker.project_update', project_id=project['project_id'], duplicate=True) }}">
+            <input type="submit" class="btn btn-secondary btn-xs" value="Duplicate" />
+          </form>
+        </td>
+        <td>
+          <form action="{{ url_for('tracker.project_update', project_id=project['project_id']) }}">
+            <input type="submit" class="btn btn-secondary btn-xs" value="Edit" />
+          </form>
+        </td>
+        <td>
+          <form action="{{ url_for('tracker.project_delete', project_id=project['project_id']) }}">
+            <input type="submit" class="btn btn-secondary btn-xs" value="Delete" />
+          </form>
+        </td>
+        <td><a href="{{ url_for('tracker.project_view', project_id=project['project_id']) }}">{{ project['project_id'] }}</a></td>
+        <td>{{ project['lab_lead'] }}</td>
+        <td>{{ project['description'] }}</td>
+        <td>{{ project['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}
+          by {% if 'added_by' in project %}{{ project['added_by'] }}{% endif %}</td>
+        <td>{{ project['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}
+          by {% if 'last_modified_by' in project %}{{ project['last_modified_by'] }}{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    var table = $('#project_table').DataTable({
+        columnDefs: [
+            {orderable: false, targets: [0, 1]},
+            {searchable: false, targets: [0, 1, -1, -2]}
+        ],
+        order: [[$('#project_table_head tr th').length - 1, 'desc']]
+    });
+  });
+</script>

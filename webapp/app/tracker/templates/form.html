@@ -1,0 +1,55 @@
+{% macro field(field_name, field_options) %}
+  <div class="mb-3">
+    <label for="{{ field_name }}" class="form-label">{{ field_options['display_name'] }}</label>
+    {% if field_options['field_type'] == 'id_input' %}
+      <input name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:25%" 
+        value="{{ form_values[field_name] }}" required
+        {% if form_values[field_name] != "" and not field_options['editable'] %}readonly{% endif %}>
+    
+    {% elif field_options['field_type'] == 'input' %}
+      <input name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:25%"
+        value="{{ form_values[field_name] }}">
+
+    {% elif field_options['field_type'] == 'select' %}
+      <select name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:auto">
+        {% for option_value in form_select_values[field_name] %}
+          <option value="{{ option_value }}" {% if form_values[field_name] == option_value %}selected{% endif %}>
+            {{ option_value }}
+          </option>
+        {% endfor %}
+      </select>
+
+    {% elif field_options['field_type'] == 'textarea' %}
+      <textarea name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:25%" rows="2">{{ form_values[field_name] }}</textarea>
+    
+    {% elif field_options['field_type'] == 'select_input' %}
+      <select name="{{ field_name ~ '_select' }}" id="{{ field_name ~ '_select' }}" class="form-control" style="width:auto">
+        {% for option_value in form_select_values[field_name] %}
+          <option value="{{ option_value }}" {% if form_values[field_name] == option_value %}selected{% endif %}>{{ option_value }}</option>
+        {% endfor %}
+        <option value="{{ 'new_' ~ field_name }}">...New {{ field_options['display_name'] }}...</option>
+      </select>
+      <input name="{{ field_name ~ '_input' }}" id="{{ field_name ~ '_input' }}" class="form-control" style="width:25%"
+        value="{{ form_values[field_name] }}">
+    
+    {% elif field_options['field_type'] == 'input_date' %}
+      <input name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:25%"
+        value="{{ form_values[field_name] }}">
+
+    {% else %}
+      ERROR: Not implemented<br>
+
+    {% endif %}
+  </div>
+{%- endmacro %}
+
+<form method="post">
+  <div class="form-group">
+    {% for field_name, field_options in form_dict.items() %}
+      {{ field(field_name, field_options) }}
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+

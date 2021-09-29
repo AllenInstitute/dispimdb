@@ -1,0 +1,73 @@
+<form action="{{ url_for('tracker.session_update') }}">
+  <input type="submit" class="btn btn-primary btn-sm" value="Insert New Imaging Session" />
+</form>
+
+<br>
+
+<div class="table-responsive">
+  <table id="session_table" class="table table-striped table-hover" style="width:100%">
+    <thead id="session_table_head" class="table-dark">
+      <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th scope="col">session_id</th>
+        <th scope="col">section_ids</th>
+        <th scope="col">imaging_date</th>
+        <th scope="col">scope</th>
+        <th scope="col">objective</th>
+        <th scope="col">date_added</th>
+        <th scope="col">last_modified</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for session in session_list %}
+      <tr>
+        <td>
+          <form action="{{ url_for('tracker.session_update', session_id=session['session_id'], duplicate=True) }}">
+            <input type="submit" class="btn btn-secondary btn-xs" value="Duplicate" />
+          </form>
+        </td>
+        <td>
+          <form action="{{ url_for('tracker.session_update', session_id=session['session_id']) }}">
+            <input type="submit" class="btn btn-secondary btn-xs" value="Duplicate" />
+          </form>
+        </td>
+        <td>
+          <form action="{{ url_for('tracker.session_delete', session_id=session['session_id']) }}">
+            <input type="submit" class="btn btn-secondary btn-xs" value="Delete" />
+          </form>
+        </td>
+        <td><a href="{{ url_for('tracker.session_view', session_id=session['session_id']) }}">{{ session['session_id'] }}</a></td>
+        <td>{{ session['section_ids']|join(', ') }}</td>
+        {% if session['imaging_date'] is string %}
+          <td>{{ session['imaging_date'] }}</td>
+        {% else %}
+          <td>{{ session['imaging_date'].strftime('%m/%d/%y') }}</td>
+        {% endif %}
+        <td>{{ session['scope'] }}</td>
+        <td>{{ session['objective'] }}</td>
+        <td>{{ session['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }} 
+          by {% if 'added_by' in session %}{{ session['added_by'] }}{% endif %}</td>
+        <td>{{ session['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }} 
+          by {% if 'last_modified_by' in session %}{{ session['last_modified_by'] }}{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#session_table').DataTable({
+        columnDefs: [
+            {orderable: false, targets: [0, 1, 2]},
+            {searchable: false, targets: [0, 1, -1, -2]}
+        ],
+        order: [[$('#session_table_head tr th').length - 1, 'desc']]
+    });
+
+    console.log("Session table head")
+    console.log($('#session_table_head tr th').length - 1)
+  });
+</script>

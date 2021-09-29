@@ -1,0 +1,107 @@
+{% extends 'tracker.html' %}
+
+{% block header %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    {% if thumbnail_path|length > 0 %}
+        <img src="{{ url_for('static', filename=thumbnail_path) }}" alt="No thumbnail found"/><br><br>
+    {% endif %}
+
+    <div class="accordion accordion-flush">
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#session_view">Imaging Session</button><br>
+            <div class="collapse show" id="specimen_view">
+                <form action="{{ url_for('tracker.session_update', session_id=session_dict['session_id']) }}">
+                    <input type="submit" class="btn btn-primary btn-sm" value="Edit" />
+                </form>
+
+                <br>
+
+                <table class="table table-striped text-left">
+                    <tr>
+                        <td>Session ID</td>
+                        <td>{{ session_dict['session_id'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Specimen ID</td>
+                        <td>{{ session_dict['specimen_id'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Section IDs</td>
+                        <td>{{ session_dict['section_ids']|join(', ') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Imaging Date</td>
+                        {% if session_dict['imaging_date'] is string %}
+                        <td>{{ session_dict['imaging_date'] }}</td>
+                        {% else %}
+                        <td>{{ session_dict['imaging_date'].strftime('%m/%d/%y') }}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <td>Scope</td>
+                        <td>{{ session_dict['scope'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Objectivity</td>
+                        <td>{{ session_dict['objective'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Imaging Bath</td>
+                        <td>{{ session_dict['imaging_bath'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Laser Power</td>
+                        <td>{{ session_dict['laser_power'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Raw TIFF Path</td>
+                        <td>{{ session_dict['raw_tiff_path'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>GIF Path</td>
+                        <td>{{ session_dict['gif_path'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Notes</td>
+                        <td>{{ session_dict['notes'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Added By</td>
+                        <td>{{ session_dict['added_by'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Date Added</td>
+                        <td>{{ session_dict['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Modified By</td>
+                        <td>{{ session_dict['modified_by'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Modified</td>
+                        <td>{{ session_dict['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="accordion-item">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#session_viz_tools">Visualization Tools</button><br>
+            <div class="collapse show" id="session_viz_tools">
+                <a class="btn btn-secondary btn-sm"
+                    href="{{ url_for('tasks.generate_gifs_ijm') }}" role="button">Convert to GIFs</a>
+
+                <a class="btn btn-secondary btn-sm" href="#" role="button">Generate Overview GIF</a>
+
+                <a class="btn btn-secondary btn-sm" href="#" role="button">Generate BDV Files</a>
+
+                <a class="btn btn-secondary btn-sm" href="#" role="button">Generate N5 Files</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
