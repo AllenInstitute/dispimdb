@@ -16,7 +16,7 @@ from werkzeug.exceptions import abort
 from app.auth import login_required
 from app.db import get_db, query_mongo
 from app.forms import ProjectForm
-from dispimdb import dispimdb
+#from dispimdb import dispimdb
 
 from . import bp, session, section, specimen
 
@@ -90,9 +90,11 @@ project_table_config = {
 
 }
 
+'''
 class ProjectCollection(dispimdb.DispimDbCollection):
     def __init__(self):
         pass
+'''
 
 class Project:
     def __init__(self, project_dict=default_project):

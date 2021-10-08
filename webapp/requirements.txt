@@ -1,6 +1,8 @@
 bokeh
+celery
 flask
 flask_wtf
+flower
 imageio
 gunicorn
 matplotlib
