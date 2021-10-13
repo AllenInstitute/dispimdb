@@ -6,9 +6,9 @@ from typing import Optional, List
 
 from starlette.status import HTTP_201_CREATED
 
-from db.db import dispimdb
+from api.db.db import dispimdb
 
-from app.models.section import (
+from api.app.models.section import (
     SectionModel,
     UpdateSectionModel
 )
@@ -50,10 +50,10 @@ def get_sections(specimen_id: str):
 @router.get('/{specimen_id}/section/{section_num}',
     tags=['sections'])
 def get_section(specimen_id: str,
-                    section_num: int):
+                section_num: int):
     section = dispimdb['sections'].find_one({
         'specimen_id': specimen_id,
-        'section_num': str(section_num)})
+        'section_num': section_num})
 
     if section:
         section.pop('_id')

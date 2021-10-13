@@ -6,9 +6,8 @@ from typing import Optional, List
 
 from starlette.status import HTTP_201_CREATED
 
-from db.db import dispimdb
-
-from app.models.project import (
+from api.db.db import dispimdb
+from api.app.models.project import (
     ProjectModel,
     UpdateProjectModel
 )

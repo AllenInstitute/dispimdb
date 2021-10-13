@@ -7,8 +7,8 @@ from bson import ObjectId
 from typing import Optional, List
 from starlette.status import HTTP_201_CREATED
 
-from db.db import dispimdb
-from app.models.acquisition import (
+from api.db.db import dispimdb
+from api.app.models.acquisition import (
     StartAcquisitionModel,
     UpdateAcquisitionModel
 )

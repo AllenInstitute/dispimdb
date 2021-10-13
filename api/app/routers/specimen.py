@@ -6,9 +6,9 @@ from typing import Optional, List
 
 from starlette.status import HTTP_201_CREATED
 
-from db.db import dispimdb
+from api.db.db import dispimdb
 
-from app.models.specimen import (
+from api.app.models.specimen import (
     SpecimenModel,
     UpdateSpecimenModel
 )
