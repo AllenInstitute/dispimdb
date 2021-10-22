@@ -4,7 +4,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from api.app.app import app
+from dispimdb_api.app.app import app
+
 
 client = TestClient(app)
 
@@ -23,21 +24,21 @@ def test_get_specimen(mongo_insert_specimens, good_specimens):
 
         assert response.status_code == 200
         assert specimen_data['specimen_id'] == specimen['specimen_id']
-    
+
 def test_update_specimen(mongo_insert_specimens, good_specimens):
     updated_status = 'Finished'
     for specimen in good_specimens:
         if '_id' in specimen:
             specimen.pop('_id')
-        
+
         specimen['status'] = updated_status
         response = client.put('api/' + specimen['specimen_id'], json=specimen)
         specimen_data = response.json()
-        
+
         assert response.status_code == 202
         assert specimen_data['specimen_id'] == specimen['specimen_id']
         assert specimen_data['status'] == specimen['status']
-    
+
 def test_delete_specimen(mongo_insert_specimens, good_specimens):
     for specimen in good_specimens:
         delete_response = client.delete('api/' + specimen['specimen_id'])
@@ -49,7 +50,7 @@ def test_delete_specimen(mongo_insert_specimens, good_specimens):
 def test_create_acquisition(mongo_delete_acquisitions, good_acquisitions):
     for acquisition in good_acquisitions:
         acquisition_url = os.path.join('api/', 'new_acquisition')
-        
+
         response = client.post(acquisition_url, json=acquisition)
         acquisition_data = response.json()
 
@@ -57,13 +58,13 @@ def test_create_acquisition(mongo_delete_acquisitions, good_acquisitions):
         assert acquisition_data['specimen_id'] == acquisition['specimen_id']
         assert acquisition_data['acquisition_id'] == acquisition['acquisition_id']
 
-def test_get_acquisition(mongo_insert_acquisitions, good_acquisitions):    
+def test_get_acquisition(mongo_insert_acquisitions, good_acquisitions):
     for acquisition in good_acquisitions:
         acquisition_url = os.path.join('api/',
             acquisition['specimen_id'],
             'acquisition',
             acquisition['acquisition_id'])
-        
+
         response = client.get(acquisition_url)
         acquisition_data = response.json()
 
@@ -77,17 +78,17 @@ def test_update_acquisition(mongo_insert_acquisitions, good_acquisitions):
     for acquisition in good_acquisitions:
         if '_id' in acquisition:
             acquisition.pop('_id')
-        
+
         acquisition['data_location']['n5_directory'] = n5_directory
 
         acquisition_url = os.path.join('api/',
             acquisition['specimen_id'],
             'acquisition',
             acquisition['acquisition_id'])
-        
+
         response = client.put(acquisition_url, json=acquisition)
         acquisition_data = response.json()
-        
+
         assert response.status_code == 202
         assert acquisition_data['specimen_id'] == acquisition['specimen_id']
         assert acquisition_data['acquisition_id'] == acquisition['acquisition_id']
@@ -99,7 +100,7 @@ def test_delete_acquisition(mongo_insert_acquisitions, good_acquisitions):
             acquisition['specimen_id'],
             'acquisition',
             acquisition['acquisition_id'])
-        
+
         delete_response = client.delete(acquisition_url)
         get_response = client.get(acquisition_url)
 
@@ -109,7 +110,7 @@ def test_delete_acquisition(mongo_insert_acquisitions, good_acquisitions):
 def test_create_section(mongo_delete_sections, good_sections):
     for section in good_sections:
         section_url = os.path.join('api/', 'new_section')
-        
+
         response = client.post(section_url, json=section)
         section_data = response.json()
 
@@ -119,15 +120,15 @@ def test_create_section(mongo_delete_sections, good_sections):
         assert section_data['specimen_id'] == section['specimen_id']
         assert section_data['section_num'] == section['section_num']
 
-def test_get_section(mongo_insert_sections, good_sections):    
+def test_get_section(mongo_insert_sections, good_sections):
     for section in good_sections:
         section_url = os.path.join('api/',
             section['specimen_id'],
             'section',
             str(section['section_num']))
-        
+
         print(section_url)
-        
+
         response = client.get(section_url)
         section_data = response.json()
 
@@ -144,17 +145,17 @@ def test_update_section(mongo_insert_sections, good_sections):
     for section in good_sections:
         if '_id' in section:
             section.pop('_id')
-        
+
         section['other_notes'] = other_notes
 
         section_url = os.path.join('api/',
             section['specimen_id'],
             'section',
             str(section['section_num']))
-        
+
         response = client.put(section_url, json=section)
         section_data = response.json()
-        
+
         assert response.status_code == 202
         assert section_data['specimen_id'] == section['specimen_id']
         assert section_data['section_num'] == section['section_num']
@@ -176,7 +177,7 @@ def test_delete_section(mongo_insert_sections, good_sections):
 def test_create_session(mongo_delete_sessions, good_sessions):
     for session in good_sessions:
         session_url = os.path.join('api/', 'new_session')
-        
+
         response = client.post(session_url, json=session)
         session_data = response.json()
 
@@ -184,13 +185,13 @@ def test_create_session(mongo_delete_sessions, good_sessions):
         assert session_data['specimen_id'] == session['specimen_id']
         assert session_data['session_id'] == session['session_id']
 
-def test_get_session(mongo_insert_sessions, good_sessions):    
+def test_get_session(mongo_insert_sessions, good_sessions):
     for session in good_sessions:
         session_url = os.path.join('api/',
             session['specimen_id'],
             'session',
             session['session_id'])
-        
+
         response = client.get(session_url)
         session_data = response.json()
 
@@ -204,17 +205,17 @@ def test_update_session(mongo_insert_sessions, good_sessions):
     for session in good_sessions:
         if '_id' in session:
             session.pop('_id')
-        
+
         session['scope'] = scope
 
         session_url = os.path.join('api/',
             session['specimen_id'],
             'session',
             session['session_id'])
-        
+
         response = client.put(session_url, json=session)
         session_data = response.json()
-        
+
         assert response.status_code == 202
         assert session_data['specimen_id'] == session['specimen_id']
         assert session_data['session_id'] == session['session_id']
