@@ -1,8 +1,16 @@
+import os
+
 import pymongo
 
-DATABASE_URI = 'mongodb://localhost:27017'
+DATABASE_URI = os.environ.get(
+    "DISPIMDB_MONGO_URI",
+    'mongodb://localhost:27017')
 client = pymongo.MongoClient(DATABASE_URI)
-dispimdb = client['test_dispimdb']
+DATABASE_NAME = os.environ.get(
+    "DISPIMDB_DATABASE_NAME",
+    "test_dispimdb"
+)
+dispimdb = client[DATABASE_NAME]
 specimens_collection = dispimdb.specimens
 
 def specimen_helper(specimen) -> dict:
@@ -25,7 +33,7 @@ def query_specimens():
 
     for specimen in specimens_collection.find():
         specimens.append(specimen_helper(specimen))
-    
+
     return specimens
 
 def insert_specimen(specimen_data: dict) -> dict:
@@ -46,7 +54,7 @@ def query_specimen(specimen_id: str) -> dict:
 def update_specimen(specimen_id: str, specimen_data: dict):
     if len(specimen_data) < 1:
         return False
-    
+
     specimen = specimens_collection.find_one({'specimen_id': specimen_id})
     if specimen:
         updated_specimen = specimens_collection.update_one(
@@ -60,7 +68,7 @@ def update_specimen(specimen_id: str, specimen_data: dict):
 
 def delete_specimen(specimen_id: str):
     specimen = specimens_collection.find_one({'specimen_id': specimen_id})
-    
+
     if specimen:
         specimens_collection.delete_one(
             {'specimen_id': specimen_id}
