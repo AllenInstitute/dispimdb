@@ -39,7 +39,7 @@ def get_sections(specimen_id: str):
 
     for section in section_cursor:
         section.pop('_id')
-        sections.append(section)
+        sections.append(section['section_num'])
     
     if sections:
         return sections

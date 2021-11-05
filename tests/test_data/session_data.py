@@ -1,6 +1,6 @@
 session_good_data = [
     {
-        'session_id': '071021',
+        'session_id': '091721',
         'specimen_id': '123456',
         'section_num': 7,
         'imaging_date': '',

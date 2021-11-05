@@ -20,6 +20,8 @@ def test_get_specimen(mongo_insert_specimens, good_specimens):
     for specimen in good_specimens:
         response = client.get('api/' + specimen['specimen_id'])
         specimen_data = response.json()
+        print('Specimen data:')
+        print(specimen_data)
 
         assert response.status_code == 200
         assert specimen_data['specimen_id'] == specimen['specimen_id']
@@ -55,7 +57,8 @@ def test_create_acquisition(mongo_delete_acquisitions, good_acquisitions):
 
         assert response.status_code == 201
         assert acquisition_data['specimen_id'] == acquisition['specimen_id']
-        assert acquisition_data['acquisition_id'] == acquisition['acquisition_id']
+        assert acquisition['specimen_id'] in acquisition_data['acquisition_id']
+        assert acquisition['session_id'] in acquisition_data['acquisition_id']
 
 def test_get_acquisition(mongo_insert_acquisitions, good_acquisitions):    
     for acquisition in good_acquisitions:

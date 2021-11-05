@@ -2,6 +2,9 @@ import os
 import requests
 
 from ddbclient.settings import default_client
+from ddbclient.acquisition import Acquisition
+from ddbclient.section import Section
+from ddbclient.session import Session
 
 class Specimen:
     def __init__(self, config=default_client, data=None):
@@ -13,14 +16,14 @@ class Specimen:
         else:
             self.data = data.copy()
 
-    def insert_to_db(self):
+    def post(self, data=None):
         if self.data:
             r = requests.post(self.base_url, json=self.data)
             return r.json()
         else:
             return 'No data to save'
     
-    def update_in_db(self):
+    def put(self, data=None):
         specimen_url = os.path.join(self.base_url,
             self.data['specimen_id']).replace('\\', '/')
         
@@ -29,7 +32,10 @@ class Specimen:
         
         return specimen
     
-    def get_from_db(self, specimen_id):
+    def patch(self, data=None):
+        pass
+    
+    def get(self, specimen_id):
         if not(isinstance(specimen_id, str)):
             specimen_id = str(specimen_id)
 
@@ -42,7 +48,7 @@ class Specimen:
 
         return specimen
     
-    def delete_from_db(self):
+    def delete(self):
         specimen_url = os.path.join(self.base_url,
             self.data['specimen_id']).replace('\\', '/')
         
@@ -61,6 +67,17 @@ class Specimen:
 
         return sections
     
+    def get_section(self, section_num):
+        section_url = os.path.join(self.base_url,
+            self.data['specimen_id'],
+            'section',
+            self.data['section_num']).replace('\\', '/')
+        
+        r = requests.get(section_url)
+        section_data = r.json()
+
+        return Section(data=section_data)
+    
     def get_sessions(self):
         sessions_url = os.path.join(self.base_url,
             self.data['specimen_id'],
@@ -71,6 +88,17 @@ class Specimen:
 
         return sessions
     
+    def get_session(self, session_id):
+        session_url = os.path.join(self.base_url,
+            self.data['specimen_id'],
+            'session',
+            self.data['session_id']).replace('\\', '/')
+        
+        r = requests.get(session_url)
+        session_data = r.json()
+
+        return Session(data=session_data)
+    
     def get_acquisitions(self):
         acquisitions_url = os.path.join(self.base_url,
             self.data['specimen_id'],
@@ -80,3 +108,14 @@ class Specimen:
         acquisitions = r.json()
 
         return acquisitions
+    
+    def get_acquisition(self, acquisition_id):
+        acquisition_url = os.path.join(self.base_url,
+            self.data['specimen_id'],
+            'acquisition',
+            self.data['acquisition_id']).replace('\\', '/')
+        
+        r = requests.get(acquisition_url)
+        acquisition_data = r.json()
+
+        return Acquisition(data=acquisition_data)

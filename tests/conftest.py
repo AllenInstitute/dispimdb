@@ -7,15 +7,14 @@ from test_data.session_data import session_good_data
 import pymongo
 
 client = pymongo.MongoClient('mongodb://localhost:27017')
-db = client['dispimdb']
+db = client['testdb']
 
 @pytest.fixture(scope="function")
 def mongo_delete_specimens(request):
     specimens = db.specimens
 
     def teardown():
-        for specimen in specimen_good_data:
-            specimens.delete_one({'specimen_id': specimen['specimen_id']})
+        specimens.drop()
     
     request.addfinalizer(teardown)
 
@@ -25,8 +24,7 @@ def mongo_insert_specimens(request):
     specimens.insert_many(specimen_good_data)
 
     def teardown():
-        for specimen in specimen_good_data:
-            specimens.delete_one({'specimen_id': specimen['specimen_id']})
+        specimens.drop()
     
     request.addfinalizer(teardown)
 
@@ -35,11 +33,7 @@ def mongo_delete_acquisitions(request):
     acquisitions = db.acquisitions
 
     def teardown():
-        for acquisition in acquisition_good_data:
-            acquisitions.delete_one({
-                'specimen_id': acquisition['specimen_id'],
-                'acquisition_id': acquisition['acquisition_id']
-            })
+        acquisitions.drop()
     
     request.addfinalizer(teardown)
 
@@ -49,11 +43,7 @@ def mongo_insert_acquisitions(request):
     acquisitions.insert_many(acquisition_good_data)
 
     def teardown():
-        for acquisition in acquisition_good_data:
-            acquisitions.delete_one({
-                'specimen_id': acquisition['specimen_id'],
-                'acquisition_id': acquisition['acquisition_id']
-            })
+        acquisitions.drop()
     
     request.addfinalizer(teardown)
 
@@ -62,11 +52,7 @@ def mongo_delete_sections(request):
     sections = db.sections
 
     def teardown():
-        for section in section_good_data:
-            sections.delete_one({
-                'specimen_id': section['specimen_id'],
-                'section_num': section['section_num']
-            })
+        sections.drop()
     
     request.addfinalizer(teardown)
 
@@ -76,11 +62,7 @@ def mongo_insert_sections(request):
     sections.insert_many(section_good_data)
 
     def teardown():
-        for section in section_good_data:
-            sections.delete_one({
-                'specimen_id': section['specimen_id'],
-                'section_num': section['section_num']
-            })
+        sections.drop()
     
     request.addfinalizer(teardown)
 
@@ -89,11 +71,7 @@ def mongo_delete_sessions(request):
     sessions = db.sessions
 
     def teardown():
-        for session in session_good_data:
-            sessions.delete_one({
-                'specimen_id': session['specimen_id'],
-                'session_id': session['session_id']
-            })
+        sessions.drop()
     
     request.addfinalizer(teardown)
 
@@ -103,11 +81,7 @@ def mongo_insert_sessions(request):
     sessions.insert_many(session_good_data)
 
     def teardown():
-        for session in session_good_data:
-            sessions.delete_one({
-                'specimen_id': session['specimen_id'],
-                'session_id': session['session_id']
-            })
+        sessions.drop()
     
     request.addfinalizer(teardown)
 

@@ -37,7 +37,7 @@ def get_specimens():
 
     for specimen in specimen_cursor:
         specimen.pop('_id')
-        specimens.append(specimen)
+        specimens.append(specimen['specimen_id'])
     
     if specimens:
         return specimens
@@ -75,21 +75,30 @@ def update_specimen(specimen_id: str,
         })
         updated_specimen.pop('_id')
 
-        if update_result.modified_count == 1 and updated_specimen:
+        if updated_specimen:
             return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
                 content=updated_specimen)
         
         raise HTTPException(status_code=404,
             detail=f'Specimen {specimen_id} not found')
 
+@router.patch('/{specimen_id}',
+    tags=['specimens'])
+def patch_specimen(specimen_id: str,
+                   data: dict):
+    if len(data) >= 1:
+        patch_result = dispimdb['specimens'].update_one({
+            'specimen_id': specimen_id
+        })
+
 @router.delete('/{specimen_id}',
     tags=['specimens'])
 def delete_specimen(specimen_id: str):
-    delete_result = dispimdb['specimens'].delete_one({
+    delete_result = dispimdb['specimens'].delete_many({
         'specimen_id': specimen_id
     })
 
-    if delete_result.deleted_count == 1:
+    if delete_result.deleted_count >= 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
     
     raise HTTPException(status_code=404,

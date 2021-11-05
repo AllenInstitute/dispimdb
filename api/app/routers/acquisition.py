@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from fastapi import APIRouter, Body, HTTPException, status
 from fastapi.responses import FileResponse, JSONResponse
@@ -19,6 +20,26 @@ router = APIRouter()
     tags=['acquisitions'])
 def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
     acquisition = jsonable_encoder(acquisition)
+
+    if not dispimdb['specimens'].find_one({'specimen_id': acquisition['specimen_id']}):
+        dispimdb['specimens'].insert_one({
+            'specimen_id': acquisition['specimen_id']
+        })
+
+    if not dispimdb['specimens'].find_one({'session_id': acquisition['session_id']}):
+        dispimdb['sessions'].insert_one({
+            'specimen_id': acquisition['specimen_id'],
+            'session_id': acquisition['session_id']
+        })
+    
+    timestamp = datetime.now()
+    timestamp_str = timestamp.strftime("%Y%m%d%H%M%S")
+    acquisition_id = '_'.join([acquisition['specimen_id'],
+        acquisition['session_id'],
+        timestamp_str])
+    
+    acquisition['acquisition_id'] = acquisition_id
+
     new_acquisition = dispimdb['acquisitions'].insert_one(acquisition)
 
     created_acquisition = dispimdb['acquisitions'].find_one({
@@ -39,7 +60,7 @@ def get_acquisitions(specimen_id: str):
 
     for acquisition in acquisition_cursor:
         acquisition.pop('_id')
-        acquisitions.append(acquisition)
+        acquisitions.append(acquisition['acquisition_id'])
     
     if acquisitions:
         return acquisitions
@@ -51,12 +72,21 @@ def get_acquisitions(specimen_id: str):
     tags=['acquisitions'])
 def get_acquisition(specimen_id: str,
                     acquisition_id: str):
-    acquisition = dispimdb['acquisitions'].find_one({
+    #acquisition = dispimdb['acquisitions'].find_one({
+    #    'specimen_id': specimen_id,
+    #    'acquisition_id': acquisition_id})
+    acquisition = []
+    acq_cursor = dispimdb['acquisitions'].find({
         'specimen_id': specimen_id,
         'acquisition_id': acquisition_id})
+    for acq in acq_cursor:
+        acq.pop('_id')
+        acquisition.append(acq)
+    
+    return acquisition
 
     if acquisition:
-        acquisition.pop('_id')
+    #    acquisition.pop('_id')
         return acquisition
     
     raise HTTPException(status_code=404,
@@ -88,11 +118,36 @@ def update_acquisition(specimen_id: str,
     raise HTTPException(status_code=404,
         detail=f'Acquisition {acquisition_id} for specimen {specimen_id} not found')
 
+@router.patch('/{specimen_id}/acquisition/{acquisition_id}',
+    tags=['acquisitions'])
+def patch_acquisition(specimen_id: str,
+                      acquisition_id: str,
+                      data: dict):
+    
+    if len(data) >= 1:
+        update_result = dispimdb['acquisitions'].update_one({
+            'specimen_id': specimen_id,
+            'acquisition_id': acquisition_id
+        }, {'$set': data})
+
+        updated_acquisition = dispimdb['acquisitions'].find_one({
+            'specimen_id': specimen_id,
+            'acquisition_id': acquisition_id
+        })
+
+        if update_result.modified_count == 1 and updated_acquisition:
+            updated_acquisition.pop('_id')
+            return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
+                content=updated_acquisition)
+        
+    raise HTTPException(status_code=404,
+        detail=f'Acquisition {acquisition_id} for specimen {specimen_id} not found')
+
 @router.delete('/{specimen_id}/acquisition/{acquisition_id}',
     tags=['acquisitions'])
 def delete_acquisition(specimen_id: str,
                        acquisition_id: str):
-    delete_result = dispimdb['acquisitions'].delete_one({
+    delete_result = dispimdb['acquisitions'].delete_many({
         'specimen_id': specimen_id,
         'acquisition_id': acquisition_id
     })

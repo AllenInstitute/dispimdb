@@ -39,7 +39,7 @@ def get_sessions(specimen_id: str):
 
     for session in session_cursor:
         session.pop('_id')
-        sessions.append(session)
+        sessions.append(session['session_id'])
     
     if sessions:
         return sessions
@@ -92,7 +92,7 @@ def update_session(specimen_id: str,
     tags=['sessions'])
 def delete_session(specimen_id: str,
                    session_id: str):
-    delete_result = dispimdb['sessions'].delete_one({
+    delete_result = dispimdb['sessions'].delete_many({
         'specimen_id': specimen_id,
         'session_id': session_id
     })
