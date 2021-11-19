@@ -1,8 +1,14 @@
+import os
 import pymongo
 
-DATABASE_URI = 'mongodb://localhost:27017'
+DATABASE_URI = os.environ.get(
+    "DISPIMDB_MONGO_URI",
+    'mongodb://localhost:27017')
 client = pymongo.MongoClient(DATABASE_URI)
-dispimdb = client['test_dispimdb']
+DATABASE_NAME = os.environ.get(
+    "DISPIMDB_DATABASE_NAME",
+    "test_dispimdb")
+dispimdb = client[DATABASE_NAME]
 specimens_collection = dispimdb.specimens
 
 def specimen_helper(specimen) -> dict:
