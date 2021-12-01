@@ -23,7 +23,6 @@ def test_create_acquisition(mongo_delete_acquisitions, good_acquisitions):
 def test_get_acquisition(mongo_insert_acquisitions, good_acquisitions):
     for acquisition in good_acquisitions:
         acquisition_url = os.path.join('api/',
-            acquisition['specimen_id'],
             'acquisition',
             acquisition['acquisition_id'])
 
@@ -44,7 +43,6 @@ def test_update_acquisition(mongo_insert_acquisitions, good_acquisitions):
         acquisition['data_location']['n5_directory'] = n5_directory
 
         acquisition_url = os.path.join('api/',
-            acquisition['specimen_id'],
             'acquisition',
             acquisition['acquisition_id'])
 
@@ -59,7 +57,6 @@ def test_update_acquisition(mongo_insert_acquisitions, good_acquisitions):
 def test_delete_acquisition(mongo_insert_acquisitions, good_acquisitions):
     for acquisition in good_acquisitions:
         acquisition_url = os.path.join('api/',
-            acquisition['specimen_id'],
             'acquisition',
             acquisition['acquisition_id'])
 

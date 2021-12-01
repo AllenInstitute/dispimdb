@@ -86,24 +86,15 @@ def get_acquisitions(specimen_id: str):
 @router.get('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
 def get_acquisition(acquisition_id: str):
-    #acquisition = dispimdb['acquisitions'].find_one({
-    #    'specimen_id': specimen_id,
-    #    'acquisition_id': acquisition_id})
-    acquisition = []
-    acq_cursor = dispimdb['acquisitions'].find({
+    acquisition = dispimdb['acquisitions'].find_one({
         'acquisition_id': acquisition_id})
-    for acq in acq_cursor:
-        acq.pop('_id')
-        acquisition.append(acq)
-    
-    return acquisition
 
     if acquisition:
-    #    acquisition.pop('_id')
+        acquisition.pop('_id')
         return acquisition
     
     raise HTTPException(status_code=404,
-        detail=f'Acquisition {acquisition_id} for specimen {specimen_id} not found')
+        detail=f'Acquisition {acquisition_id} not found')
 
 @router.get('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
@@ -163,26 +154,32 @@ def patch_acquisition(acquisition_id: str,
     raise HTTPException(status_code=404,
         detail=f'Acquisition {acquisition_id} not found')
 
-# TODO: confirm data location stuff and 
-@router.patch('/acquisition/{acquisition_id}',
-    tags=['acquisitions'])
-def patch_acquisition_status(acquisition_id: str,
-                             status: str):
-    update_result = dispimdb['acquisitions'].update_one({
-        'acquisition_id': acquisition_id
-    }, {'$set': {'data_location': status}})
+@router.patch('/acquisitions/{acquisition_id}/data_location/{data_key}/status/{state}',
+              tags=["acquisitions"])
+def patch_data_location_status(acquisition_id: str, data_key: str,
+                               state: str):
+    # TODO implement state table w/ allowed transitions
+    update_field = f"data_location.{data_key}.status"
+    updated_doc = dispimdb["acquisitions"].find_one_and_update(
+      {"_id": acquisition_id},
+      {"$set": {update_field: state}},
+    )
+    
+    return JSONResponse(status_code=200)
 
-    updated_acquisition = dispimdb['acquisitions'].find_one({
-        'acquisition_id': acquisition_id
-    })
 
-    if update_result.modified_count == 1 and updated_acquisition:
-        updated_acquisition.pop('_id')
-        return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
-            content=updated_acquisition)
-
-    raise HTTPException(status_code=404,
-        detail=f'Acquisition {acquisition_id} not found')
+@router.put("/acquisitions/{acquisition_id}/data_location/{data_key}",
+            tags=["acquisitions"])
+def put_data_location(acquisition_id: str, data_key: str,
+                      request: Dict[Any, Any]):
+    # TODO do not allow overwriting
+    # TODO
+    update_field = f"data_location.{data_key}"
+    updated_doc = dispimdb["acquisitions"].find_one_and_update(
+         {"_id": acquisition_id},
+         {"$set": {update_field: request}},
+    )
+    return JSONResponse(status_code=200)
 
 @router.delete('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
