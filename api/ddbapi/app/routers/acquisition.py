@@ -105,6 +105,19 @@ def get_acquisition(acquisition_id: str):
     raise HTTPException(status_code=404,
         detail=f'Acquisition {acquisition_id} for specimen {specimen_id} not found')
 
+@router.get('/acquisition/{acquisition_id}',
+    tags=['acquisitions'])
+def query_acquisition(acquisition_id: str,
+                      query: dict):
+    acquisitions = []
+    acq_cursor = dispimdb['acquisitions'].find(dict)
+
+    for acq in acq_cursor:
+        acq.pop('_id')
+        acquisitions.append(acq)
+    
+    return acquisitions
+
 @router.put('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
 def update_acquisition(acquisition_id: str, 
@@ -147,6 +160,27 @@ def patch_acquisition(acquisition_id: str,
             return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
                 content=updated_acquisition)
         
+    raise HTTPException(status_code=404,
+        detail=f'Acquisition {acquisition_id} not found')
+
+# TODO: confirm data location stuff and 
+@router.patch('/acquisition/{acquisition_id}',
+    tags=['acquisitions'])
+def patch_acquisition_status(acquisition_id: str,
+                             status: str):
+    update_result = dispimdb['acquisitions'].update_one({
+        'acquisition_id': acquisition_id
+    }, {'$set': {'data_location': status}})
+
+    updated_acquisition = dispimdb['acquisitions'].find_one({
+        'acquisition_id': acquisition_id
+    })
+
+    if update_result.modified_count == 1 and updated_acquisition:
+        updated_acquisition.pop('_id')
+        return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
+            content=updated_acquisition)
+
     raise HTTPException(status_code=404,
         detail=f'Acquisition {acquisition_id} not found')
 

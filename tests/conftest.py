@@ -1,32 +1,10 @@
 import pytest
-from test_data.specimen_data import specimen_good_data
 from test_data.acquisition_data import acquisition_good_data
-from test_data.section_data import section_good_data
-from test_data.session_data import session_good_data
 
 import pymongo
 
 client = pymongo.MongoClient('mongodb://localhost:27017')
 db = client['testdb']
-
-@pytest.fixture(scope="function")
-def mongo_delete_specimens(request):
-    specimens = db.specimens
-
-    def teardown():
-        specimens.drop()
-    
-    request.addfinalizer(teardown)
-
-@pytest.fixture(scope="session")
-def mongo_insert_specimens(request):
-    specimens = db.specimens
-    specimens.insert_many(specimen_good_data)
-
-    def teardown():
-        specimens.drop()
-    
-    request.addfinalizer(teardown)
 
 @pytest.fixture(scope="function")
 def mongo_delete_acquisitions(request):

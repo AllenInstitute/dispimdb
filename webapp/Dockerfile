@@ -15,4 +15,4 @@ WORKDIR /webapp
 COPY . /webapp
 RUN pip install -r requirements.txt
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-nc", "/etc/supervisor/supervisord.conf"]

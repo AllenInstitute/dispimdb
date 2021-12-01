@@ -8,10 +8,10 @@ from .routers import acquisition, project, section, session, specimen
 api = FastAPI()
 
 api.include_router(acquisition.router)
-api.include_router(project.router)
-api.include_router(section.router)
-api.include_router(session.router)
-api.include_router(specimen.router)
+#api.include_router(project.router)
+#api.include_router(section.router)
+#api.include_router(session.router)
+#api.include_router(specimen.router)
 
 app = FastAPI()
 app.mount('/api', api)
