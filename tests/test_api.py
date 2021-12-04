@@ -4,7 +4,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from dispimdb_api.app.app import app
+from ddbapi.app.app import app
 
 
 client = TestClient(app)

@@ -6,7 +6,7 @@ import fastapi.encoders
 
 import pymongo
 
-from dispimdb_api.db.db import dispimdb
+from ddbapi.db.db import dispimdb
 
 router = fastapi.APIRouter()
 
