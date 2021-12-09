@@ -5,10 +5,11 @@ from fastapi import APIRouter, Body, HTTPException, status
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
-from typing import Optional, List
+from typing import Any, Dict, Optional, List
 from starlette.status import HTTP_201_CREATED
 
 from ddbapi.db.db import dispimdb
+from ddbapi.db.states import states, allowed_transitions
 from ddbapi.app.models.acquisition import (
     StartAcquisitionModel,
     UpdateAcquisitionModel
@@ -16,18 +17,18 @@ from ddbapi.app.models.acquisition import (
 
 def generate_acquisition_id(acquisition):
     dt = datetime.datetime.fromisoformat(
-        acquisition["acquisition_time_utc"])
-    dt_string = dt.strftime("%Y%m%dT%H:%M:%S:%fZ")
+        acquisition['acquisition_time_utc'])
+    dt_string = dt.strftime('%Y%m%dT%H:%M:%S:%fZ')
     return "_".join(map(str, (
-        acquisition["specimen_id"],
-        acquisition["session_id"],
-        acquisition["section_num"],
+        acquisition['specimen_id'],
+        acquisition['section_num'],
+        acquisition['session_id'],
         dt_string
     )))
 
 def acquisition_with_id(acquisition):
     acq_id = generate_acquisition_id(acquisition)
-    return dict(acquisition, **{"_id": acq_id})
+    return dict(acquisition, **{'_id': acq_id})
 
 router = APIRouter()
 
@@ -156,27 +157,46 @@ def patch_acquisition(acquisition_id: str,
 
 @router.patch('/acquisitions/{acquisition_id}/data_location/{data_key}/status/{state}',
               tags=["acquisitions"])
-def patch_data_location_status(acquisition_id: str, data_key: str,
+def patch_data_location_status(acquisition_id: str,
+                               data_key: str,
                                state: str):
-    # TODO implement state table w/ allowed transitions
+
+    acquisition = dispimdb["acquisitions"].find_one({
+        "acquisition_id": acquisition_id
+    })
+
+    if not state in states:
+        raise HTTPException(status_code=400,
+            detail=f'State {state} does not exist')
+    
+    if not state in allowed_transitions[state]:
+        raise HTTPException(status_code=400,
+            detail=f'State transition not allowed')
+
     update_field = f"data_location.{data_key}.status"
-    updated_doc = dispimdb["acquisitions"].find_one_and_update(
-      {"_id": acquisition_id},
-      {"$set": {update_field: state}},
+    updated_doc = dispimdb["acquisitions"].update_one(
+        {"acquisition_id": acquisition_id},
+        {"$set": {update_field: state}},
     )
     
     return JSONResponse(status_code=200)
 
-
 @router.put("/acquisitions/{acquisition_id}/data_location/{data_key}",
             tags=["acquisitions"])
-def put_data_location(acquisition_id: str, data_key: str,
+def put_data_location(acquisition_id: str,
+                      data_key: str,
                       request: Dict[Any, Any]):
-    # TODO do not allow overwriting
-    # TODO
+    acquisition = dispimdb["acquisitions"].find_one({
+        "acquisition_id": acquisition_id
+    })
+
+    if not request.keys()[0] in acquisition["data_location"]:
+        raise HTTPException(status_code=400,
+            detail=f'Data location already exists')
+
     update_field = f"data_location.{data_key}"
-    updated_doc = dispimdb["acquisitions"].find_one_and_update(
-         {"_id": acquisition_id},
+    updated_doc = dispimdb["acquisitions"].update_one(
+         {"acquisition_id": acquisition_id},
          {"$set": {update_field: request}},
     )
     return JSONResponse(status_code=200)
