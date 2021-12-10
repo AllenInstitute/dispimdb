@@ -69,14 +69,29 @@ def patch(acquisition_id, data):
     response = utils.patch_json(url, query, data)
     return response
 
-def put_data_location(acquisition_id, data_location):
+def put_data_location(acquisition_id, data_key):
     url = os.path.join([client.hostname,
         client.subpath,
         'acquisition',
-        acquisition_id])
+        acquisition_id,
+        'data_location',
+        data_key])
+    
+    response = utils.put_json(url, query, data_key)
+    return response
 
-def patch_status(acquisition_id, status):
-    pass
+def patch_status(acquisition_id, data_key, state):
+    url = os.path.join([client.hostname,
+        client.subpath,
+        'acquisition',
+        acquisition_id,
+        'data_location',
+        data_key,
+        'status',
+        state])
+    
+    response = utils.put_json(url, query, state)
+    return response
 
 def delete(acquisition_id):
     url = os.path.join([client.hostname,
