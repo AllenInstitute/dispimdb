@@ -1,5 +1,5 @@
 import pytest
-from test_data.acquisition_data import acquisition_good_data
+from test_data import acquisition_data
 
 import pymongo
 
@@ -7,7 +7,7 @@ client = pymongo.MongoClient('mongodb://localhost:27017')
 db = client['testdb']
 
 @pytest.fixture(scope="function")
-def mongo_delete_acquisitions(request):
+def mongo_delete_acq_after(request):
     acquisitions = db.acquisitions
 
     def teardown():
@@ -15,74 +15,24 @@ def mongo_delete_acquisitions(request):
     
     request.addfinalizer(teardown)
 
-@pytest.fixture(scope="session")
-def mongo_insert_acquisitions(request):
+@pytest.fixture(scope="function")
+def mongo_insert_delete_acq(request):
     acquisitions = db.acquisitions
-    acquisitions.insert_many(acquisition_good_data)
+    acquisitions.insert_many(acquisition_data.acq_good_doc)
 
     def teardown():
         acquisitions.drop()
     
     request.addfinalizer(teardown)
-
-@pytest.fixture(scope="function")
-def mongo_delete_sections(request):
-    sections = db.sections
-
-    def teardown():
-        sections.drop()
-    
-    request.addfinalizer(teardown)
-
-@pytest.fixture(scope="session")
-def mongo_insert_sections(request):
-    sections = db.sections
-    sections.insert_many(section_good_data)
-
-    def teardown():
-        sections.drop()
-    
-    request.addfinalizer(teardown)
-
-@pytest.fixture(scope="function")
-def mongo_delete_sessions(request):
-    sessions = db.sessions
-
-    def teardown():
-        sessions.drop()
-    
-    request.addfinalizer(teardown)
-
-@pytest.fixture(scope="session")
-def mongo_insert_sessions(request):
-    sessions = db.sessions
-    sessions.insert_many(session_good_data)
-
-    def teardown():
-        sessions.drop()
-    
-    request.addfinalizer(teardown)
-
-@pytest.fixture()
-def my_name():
-    return "Sam Kinn".upper()
-
-@pytest.fixture()
-def list_of_numbers():
-    return [1, 2, 3, 4]
-
-@pytest.fixture()
-def good_specimens():
-    return specimen_good_data
 
 @pytest.fixture()
 def good_acquisitions():
-    return acquisition_good_data
+    return acquisition_data.acq_good_doc
 
 @pytest.fixture()
-def good_sections():
-    return section_good_data
+def bad_acquisitions():
+    return acquisition_data.acq_bad_doc
 
 @pytest.fixture()
-def good_sessions():
-    return session_good_data
+def specimen_id():
+    return acquisition_data.acq_good_doc[0]['specimen_id']

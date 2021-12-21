@@ -16,9 +16,9 @@ from ddbapi.app.models.acquisition import (
 )
 
 def generate_acquisition_id(acquisition):
-    dt = datetime.datetime.fromisoformat(
+    dt = datetime.fromisoformat(
         acquisition['acquisition_time_utc'])
-    dt_string = dt.strftime('%Y%m%dT%H:%M:%S:%fZ')
+    dt_string = dt.strftime('%Y%m%dT%H%M%S%fZ')
     return "_".join(map(str, (
         acquisition['specimen_id'],
         acquisition['section_num'],
@@ -48,13 +48,7 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
             'session_id': acquisition['session_id']
         })
     
-    timestamp = datetime.now()
-    timestamp_str = timestamp.strftime("%Y%m%d%H%M%S")
-    acquisition_id = '_'.join([acquisition['specimen_id'],
-        acquisition['session_id'],
-        timestamp_str])
-    
-    acquisition['acquisition_id'] = acquisition_id
+    acquisition['acquisition_id'] = generate_acquisition_id(acquisition)
 
     new_acquisition = dispimdb['acquisitions'].insert_one(acquisition)
 
@@ -81,7 +75,7 @@ def get_acquisitions(specimen_id: str):
     if acquisitions:
         return acquisitions
     
-    raise HTTPException(status_code=404,
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'No acquisitions found for specimen {specimen_id}')
 
 @router.get('/acquisition/{acquisition_id}',
@@ -97,10 +91,9 @@ def get_acquisition(acquisition_id: str):
     raise HTTPException(status_code=404,
         detail=f'Acquisition {acquisition_id} not found')
 
-@router.get('/acquisition/{acquisition_id}',
+@router.get('/acquisition/query',
     tags=['acquisitions'])
-def query_acquisition(acquisition_id: str,
-                      query: dict):
+def query_acquisition(query: dict):
     acquisitions = []
     acq_cursor = dispimdb['acquisitions'].find(dict)
 
@@ -127,12 +120,13 @@ def update_acquisition(acquisition_id: str,
 
         if update_result.modified_count == 1 and updated_acquisition:
             updated_acquisition.pop('_id')
-            return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
+            return JSONResponse(status_code=status.HTTP_200_OK,
                 content=updated_acquisition)
         
-    raise HTTPException(status_code=404,
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')
 
+'''
 @router.patch('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
 def patch_acquisition(acquisition_id: str,
@@ -152,10 +146,11 @@ def patch_acquisition(acquisition_id: str,
             return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
                 content=updated_acquisition)
         
-    raise HTTPException(status_code=404,
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')
+'''
 
-@router.patch('/acquisitions/{acquisition_id}/data_location/{data_key}/status/{state}',
+@router.patch('/acquisition/{acquisition_id}/data_location/{data_key}/status/{state}',
               tags=["acquisitions"])
 def patch_data_location_status(acquisition_id: str,
                                data_key: str,
@@ -166,11 +161,12 @@ def patch_data_location_status(acquisition_id: str,
     })
 
     if not state in states:
-        raise HTTPException(status_code=400,
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
             detail=f'State {state} does not exist')
     
-    if not state in allowed_transitions[state]:
-        raise HTTPException(status_code=400,
+    current_state = acquisition['data_location'][data_key]['status']
+    if not state in allowed_transitions[current_state]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
             detail=f'State transition not allowed')
 
     update_field = f"data_location.{data_key}.status"
@@ -179,9 +175,9 @@ def patch_data_location_status(acquisition_id: str,
         {"$set": {update_field: state}},
     )
     
-    return JSONResponse(status_code=200)
+    return JSONResponse(status_code=status.HTTP_200_OK)
 
-@router.put("/acquisitions/{acquisition_id}/data_location/{data_key}",
+@router.put("/acquisition/{acquisition_id}/data_location/{data_key}",
             tags=["acquisitions"])
 def put_data_location(acquisition_id: str,
                       data_key: str,
@@ -190,8 +186,8 @@ def put_data_location(acquisition_id: str,
         "acquisition_id": acquisition_id
     })
 
-    if not request.keys()[0] in acquisition["data_location"]:
-        raise HTTPException(status_code=400,
+    if data_key in acquisition["data_location"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
             detail=f'Data location already exists')
 
     update_field = f"data_location.{data_key}"
@@ -199,7 +195,7 @@ def put_data_location(acquisition_id: str,
          {"acquisition_id": acquisition_id},
          {"$set": {update_field: request}},
     )
-    return JSONResponse(status_code=200)
+    return JSONResponse(status_code=status.HTTP_200_OK)
 
 @router.delete('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
@@ -208,8 +204,8 @@ def delete_acquisition(acquisition_id: str):
         'acquisition_id': acquisition_id
     })
 
-    if delete_result.deleted_count == 1:
+    if delete_result.deleted_count >= 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
         
-    raise HTTPException(status_code=404,
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')

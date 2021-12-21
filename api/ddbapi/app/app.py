@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
-from .routers import acquisition, project, section, session, specimen
+from .routers import acquisition
 
 api = FastAPI()
 
