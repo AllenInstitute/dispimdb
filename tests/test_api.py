@@ -50,27 +50,6 @@ def test_get_acquisition(mongo_insert_delete_acq, good_acquisitions):
         assert acquisition_data['specimen_id'] == acquisition['specimen_id']
         assert acquisition_data['acquisition_id'] == acquisition['acquisition_id']
 
-def test_update_acquisition(mongo_insert_delete_acq, good_acquisitions):
-    n5_directory = 'my_n5_dir'
-
-    for acquisition in good_acquisitions:
-        if '_id' in acquisition:
-            acquisition.pop('_id')
-
-        acquisition['data_location']['n5_dir'] = n5_directory
-
-        acquisition_url = os.path.join('api/',
-            'acquisition',
-            acquisition['acquisition_id'])
-
-        response = client.put(acquisition_url, json=acquisition)
-        acquisition_data = response.json()
-
-        assert response.status_code == 200
-        assert acquisition_data['specimen_id'] == acquisition['specimen_id']
-        assert acquisition_data['acquisition_id'] == acquisition['acquisition_id']
-        assert acquisition_data['data_location']['n5_dir'] == n5_directory
-
 def test_put_data_location(mongo_insert_delete_acq, good_acquisitions):
     n5_directory = {
         'name': 'my_n5_dir',
@@ -100,9 +79,7 @@ def test_patch_data_location_status(mongo_insert_delete_acq, good_acquisitions):
     for acquisition in good_acquisitions:
         if '_id' in acquisition:
             acquisition.pop('_id')
-        
-        print(acquisition)
-        
+                
         acquisition_url = os.path.join('api/',
             'acquisition',
             acquisition['acquisition_id'],

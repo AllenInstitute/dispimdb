@@ -103,6 +103,7 @@ def query_acquisition(query: dict):
     
     return acquisitions
 
+'''
 @router.put('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
 def update_acquisition(acquisition_id: str, 
@@ -126,7 +127,6 @@ def update_acquisition(acquisition_id: str,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')
 
-'''
 @router.patch('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
 def patch_acquisition(acquisition_id: str,

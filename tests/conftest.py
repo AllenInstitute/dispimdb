@@ -1,10 +1,27 @@
+from multiprocessing import Process
 import pytest
-from test_data import acquisition_data
 
 import pymongo
+import uvicorn
+
+from api.ddbapi.app.app import app
+from test_data import acquisition_data
 
 client = pymongo.MongoClient('mongodb://localhost:27017')
 db = client['testdb']
+
+def run_server():
+    uvicorn.run('ddbapi.app.app:app',
+                host='0.0.0.0',
+                port=5000,
+                reload=False)
+
+@pytest.fixture
+def server():
+    proc = Process(target=run_server, args=(), daemon=True)
+    proc.start() 
+    yield
+    proc.kill()
 
 @pytest.fixture(scope="function")
 def mongo_delete_acq_after(request):

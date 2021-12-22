@@ -7,7 +7,7 @@ DATABASE_URI = os.environ.get(
 client = pymongo.MongoClient(DATABASE_URI)
 DATABASE_NAME = os.environ.get(
     "DISPIMDB_DATABASE_NAME",
-    "test_dispimdb")
+    "testdb")
 dispimdb = client[DATABASE_NAME]
 specimens_collection = dispimdb.specimens
 

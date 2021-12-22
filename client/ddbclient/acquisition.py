@@ -9,16 +9,17 @@ from ddbclient import utils
 client = default_client
 
 def post(data):
-    url = os.path.join(client.hostname,
-        client.subpath,
+    url = os.path.join(client['hostname'],
+        client['subpath'],
         'new_acquisition')
 
-    response = utils.post_json(url, data)
-    return response
+    response_json = utils.post_json(url, data)
+
+    return response_json['acquisition_id']
 
 def get_all(specimen_id):
-    url = os.path.join(client.hostname,
-        client.subpath,
+    url = os.path.join(client['hostname'],
+        client['subpath'],
         specimen_id,
         'acquisitions')
     
@@ -28,25 +29,26 @@ def get_all(specimen_id):
     return response
 
 def get(acquisition_id):
-    url = os.path.join(client.hostname,
-        client.subpath,
+    url = os.path.join(client['hostname'],
+        client['subpath'],
         'acquisition',
         acquisition_id)
 
     query = {'acquisition_id': acquisition_id}
 
-    response = utils.get_json(url, query)
-    return response
+    response_json = utils.get_json(url, query)
+    return response_json
 
 def query(query):
-    url = os.path.join(client.hostname,
-        client.subpath,
+    url = os.path.join(client['hostname'],
+        client['subpath'],
         'acquisition',
         'query')
     
     response = utils.get_json(url, query)
     return response
 
+'''
 def put(acquisition_id, data):
     url = os.path.join(client.hostname,
         client.subpath,
@@ -68,6 +70,7 @@ def patch(acquisition_id, data):
 
     response = utils.patch_json(url, query, data)
     return response
+'''
 
 def put_data_location(acquisition_id, data_key):
     url = os.path.join(client.hostname,
@@ -77,8 +80,8 @@ def put_data_location(acquisition_id, data_key):
         'data_location',
         data_key)
     
-    response = utils.put_json(url, query, data_key)
-    return response
+    response_json = utils.put_json(url, query, data_key)
+    return response_json
 
 def patch_status(acquisition_id, data_key, state):
     url = os.path.join(client.hostname,
@@ -90,8 +93,8 @@ def patch_status(acquisition_id, data_key, state):
         'status',
         state)
     
-    response = utils.put_json(url, query, state)
-    return response
+    response_json = utils.patch_json(url, query, state)
+    return response_json
 
 def delete(acquisition_id):
     url = os.path.join(client.hostname,
@@ -101,5 +104,5 @@ def delete(acquisition_id):
     
     query = {'acquisition_id': acquisition_id}
 
-    response = utils.delete_json(url, query)
-    return response
+    response_json = utils.delete_json(url, query)
+    return response_json
