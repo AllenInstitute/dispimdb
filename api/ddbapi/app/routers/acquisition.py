@@ -175,7 +175,12 @@ def patch_data_location_status(acquisition_id: str,
         {"$set": {update_field: state}},
     )
     
-    return JSONResponse(status_code=status.HTTP_200_OK)
+    updated_acquisition = dispimdb["acquisitions"].find_one({
+        "acquisition_id": acquisition_id
+    })
+    updated_acquisition.pop('_id')
+    return JSONResponse(status_code=status.HTTP_200_OK,
+        content=updated_acquisition)
 
 @router.put("/acquisition/{acquisition_id}/data_location/{data_key}",
             tags=["acquisitions"])
@@ -195,7 +200,13 @@ def put_data_location(acquisition_id: str,
          {"acquisition_id": acquisition_id},
          {"$set": {update_field: request}},
     )
-    return JSONResponse(status_code=status.HTTP_200_OK)
+
+    updated_acquisition = dispimdb["acquisitions"].find_one({
+        "acquisition_id": acquisition_id
+    })
+    updated_acquisition.pop('_id')
+    return JSONResponse(status_code=status.HTTP_200_OK,
+        content=updated_acquisition)
 
 @router.delete('/acquisition/{acquisition_id}',
     tags=['acquisitions'])

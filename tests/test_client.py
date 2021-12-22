@@ -13,7 +13,6 @@ def test_post_acquisition(mongo_delete_acq_after, good_acquisitions):
         post_acq = copy.deepcopy(acq)
         post_acq.pop('acquisition_id')
         post_acq.pop('_id')
-        print(post_acq)
         acq_id = acquisition.post(post_acq)
 
         assert acq['acquisition_id'] == acq_id
@@ -35,20 +34,21 @@ def test_get_acquisition(mongo_insert_delete_acq, good_acquisitions):
         assert acq_get['acquisition_id'] == acq['acquisition_id']
 
 def test_put_data_location(mongo_insert_delete_acq, good_acquisitions):
-    data_location = {
-        'n5_directory': {
-            'name': 'my_n5_dir',
-            'status': 'STARTED'
-        }
+    data_key = 'n5_directory'
+    n5_directory = {
+        'name': 'my_n5_dir',
+        'status': 'STARTED'
     }
 
     for acq in good_acquisitions:
+        print(acq)
         if '_id' in acq:
             acq.pop('_id')
         
         response_json = acquisition.put_data_location(
             acq['acquisition_id'],
-            data_location
+            data_key,
+            n5_directory
         )
 
         assert data_key in response_json['data_location']
@@ -71,4 +71,6 @@ def test_patch_data_location_status(mongo_insert_delete_acq, good_acquisitions):
 
 def test_delete_acquisition(mongo_insert_delete_acq, good_acquisitions):
     for acq in good_acquisitions:
-        pass
+        response_json = acquisition.delete(acq['acquisition_id'])
+
+        assert response_json is None

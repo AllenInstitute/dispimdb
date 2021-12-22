@@ -89,7 +89,6 @@ def test_patch_data_location_status(mongo_insert_delete_acq, good_acquisitions):
             new_state)
         
         response = client.patch(acquisition_url)
-        print(response.json())
         acquisition_data = response.json()
 
         assert response.status_code == 200

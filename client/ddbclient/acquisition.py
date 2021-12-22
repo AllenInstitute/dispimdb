@@ -72,37 +72,35 @@ def patch(acquisition_id, data):
     return response
 '''
 
-def put_data_location(acquisition_id, data_key):
-    url = os.path.join(client.hostname,
-        client.subpath,
+def put_data_location(acquisition_id, data_key, data_location):
+    url = os.path.join(client['hostname'],
+        client['subpath'],
         'acquisition',
         acquisition_id,
         'data_location',
         data_key)
-    
-    response_json = utils.put_json(url, query, data_key)
+        
+    response_json = utils.put_json(url, data_location)
     return response_json
 
 def patch_status(acquisition_id, data_key, state):
-    url = os.path.join(client.hostname,
-        client.subpath,
+    url = os.path.join(client['hostname'],
+        client['subpath'],
         'acquisition',
         acquisition_id,
         'data_location',
         data_key,
         'status',
         state)
-    
-    response_json = utils.patch_json(url, query, state)
+        
+    response_json = utils.patch_json(url)
     return response_json
 
 def delete(acquisition_id):
-    url = os.path.join(client.hostname,
-        client.subpath,
+    url = os.path.join(client['hostname'],
+        client['subpath'],
         'acquisition',
         acquisition_id)
     
-    query = {'acquisition_id': acquisition_id}
-
-    response_json = utils.delete_json(url, query)
+    response_json = utils.delete_json(url)
     return response_json
