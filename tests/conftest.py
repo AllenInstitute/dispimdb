@@ -1,5 +1,5 @@
-from multiprocessing import Process
 import pytest
+from subprocess import Popen
 
 import pymongo
 import uvicorn
@@ -7,21 +7,37 @@ import uvicorn
 from api.ddbapi.app.app import app
 from test_data import acquisition_data
 
-client = pymongo.MongoClient('mongodb://localhost:27017')
-db = client['testdb']
+mongoclient = pymongo.MongoClient('mongodb://localhost:27017')
+db = mongoclient['testdb']
 
-def run_server():
-    uvicorn.run('ddbapi.app.app:app',
-                host='0.0.0.0',
-                port=5000,
-                reload=False)
+class TestServer:
+    def __init__(self):
+        self.run_args = [
+            'gunicorn',
+            'ddbapi.app.app:app',
+            '-b', '0.0.0.0:5001',
+            '-k', 'uvicorn.workers.UvicornWorker',
+            '--daemon'
+        ]
+        self.proc = None
 
-@pytest.fixture
-def server():
-    proc = Process(target=run_server, args=(), daemon=True)
-    proc.start() 
-    yield
-    proc.kill()
+    def init_proc(self):
+        self.proc = Popen(self.run_args)
+
+    def stop_proc(self):
+        self.proc.kill()
+
+@pytest.fixture(scope="session", autouse=True)
+def server(request):
+    test_server = TestServer()
+    print('Starting server')
+    test_server.init_proc()
+
+    def teardown():
+        print('Tearing down server')
+        test_server.stop_proc()
+    
+    request.addfinalizer(teardown)
 
 @pytest.fixture(scope="function")
 def mongo_delete_acq_after(request):
