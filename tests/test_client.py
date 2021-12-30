@@ -9,7 +9,7 @@ from client.ddbclient import client
 from api.ddbapi.app.app import app
 
 apiclient = client.DispimDbClient(
-    base_url='http://127.0.0.1:5001',
+    base_url='http://0.0.0.0:5001',
     subpath='api'
 )
 
