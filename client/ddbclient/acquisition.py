@@ -3,104 +3,117 @@ from datetime import datetime
 import os
 import requests
 
-from ddbclient.settings import default_client
 from ddbclient import utils
 
-client = default_client
+class AcquisitionClient:
+    def __init__(self,
+                 base_url=None,
+                 hostname=None,
+                 port=None,
+                 subpath=None):
+        self.base_url = base_url
+        self.hostname = hostname
+        self.port = port
+        self.subpath = subpath
 
-def post(data):
-    url = os.path.join(client['hostname'],
-        client['subpath'],
-        'new_acquisition')
+        if self.port is not None:
+            self.hostname = self.hostname + ':' + self.port
 
-    response_json = utils.post_json(url, data)
+        if self.base_url is None:
+            self.base_url = os.path.join(
+                self.hostname,
+                self.subpath
+            ).replace('\\', '/')
+        else:
+            self.base_url = os.path.join(
+                self.base_url,
+                self.subpath
+            ).replace('\\', '/')
 
-    return response_json['acquisition_id']
+    def post(self, data):
+        url = os.path.join(self.base_url,
+            'new_acquisition')
 
-def get_all(specimen_id):
-    url = os.path.join(client['hostname'],
-        client['subpath'],
-        specimen_id,
-        'acquisitions')
-    
-    query = {'specimen_id': specimen_id}
+        response_json = utils.post_json(url, data)
 
-    response = utils.get_json(url, query)
-    return response
+        return response_json['acquisition_id']
 
-def get(acquisition_id):
-    url = os.path.join(client['hostname'],
-        client['subpath'],
-        'acquisition',
-        acquisition_id)
-
-    query = {'acquisition_id': acquisition_id}
-
-    response_json = utils.get_json(url, query)
-    return response_json
-
-def query(query):
-    url = os.path.join(client['hostname'],
-        client['subpath'],
-        'acquisition',
-        'query')
-    
-    response = utils.get_json(url, query)
-    return response
-
-'''
-def put(acquisition_id, data):
-    url = os.path.join(client.hostname,
-        client.subpath,
-        'acquisition',
-        acquisition_id)
-    
-    query = {'acquisition_id': acquisition_id}
-
-    response = utils.put_json(url, query, data)
-    return response
-
-def patch(acquisition_id, data):
-    url = os.path.join(client.hostname,
-        client.subpath,
-        'acquisition',
-        acquisition_id)
-    
-    query = {'acquisition_id': acquisition_id}
-
-    response = utils.patch_json(url, query, data)
-    return response
-'''
-
-def put_data_location(acquisition_id, data_key, data_location):
-    url = os.path.join(client['hostname'],
-        client['subpath'],
-        'acquisition',
-        acquisition_id,
-        'data_location',
-        data_key)
+    def get_all(self, specimen_id):
+        url = os.path.join(self.base_url,
+            specimen_id,
+            'acquisitions')
         
-    response_json = utils.put_json(url, data_location)
-    return response_json
+        query = {'specimen_id': specimen_id}
 
-def patch_status(acquisition_id, data_key, state):
-    url = os.path.join(client['hostname'],
-        client['subpath'],
-        'acquisition',
-        acquisition_id,
-        'data_location',
-        data_key,
-        'status',
-        state)
+        response = utils.get_json(url, query)
+        return response
+
+    def get(self, acquisition_id):
+        url = os.path.join(self.base_url,
+            'acquisition',
+            acquisition_id)
+
+        query = {'acquisition_id': acquisition_id}
+
+        response_json = utils.get_json(url, query)
+        return response_json
+
+    def query(self, query):
+        url = os.path.join(self.base_url,
+            'acquisition',
+            'query')
         
-    response_json = utils.patch_json(url)
-    return response_json
+        response_json = utils.get_json(url, query)
+        return response_json
 
-def delete(acquisition_id):
-    url = os.path.join(client['hostname'],
-        client['subpath'],
-        'acquisition',
-        acquisition_id)
-    
-    response_json = utils.delete_json(url)
-    return response_json
+    '''
+    def put(self, acquisition_id, data):
+        url = os.path.join(self.base_url,
+            'acquisition',
+            acquisition_id)
+        
+        query = {'acquisition_id': acquisition_id}
+
+        response = utils.put_json(url, query, data)
+        return response
+
+    def patch(self, acquisition_id, data):
+        url = os.path.join(self.base_url,
+            'acquisition',
+            acquisition_id)
+        
+        query = {'acquisition_id': acquisition_id}
+
+        response = utils.patch_json(url, query, data)
+        return response
+    '''
+
+    def put_data_location(self, acquisition_id, data_key, data_location):
+        url = os.path.join(self.base_url,
+            'acquisition',
+            acquisition_id,
+            'data_location',
+            data_key)
+            
+        response_json = utils.put_json(url, data_location)
+        return response_json
+
+    def patch_status(self, acquisition_id, data_key, state):
+        url = os.path.join(self.base_url,
+            'acquisition',
+            acquisition_id,
+            'data_location',
+            data_key,
+            'status',
+            state)
+            
+        response_json = utils.patch_json(url)
+        return response_json
+
+    def delete(self, acquisition_id):
+        url = os.path.join(self.base_url,
+            'acquisition',
+            acquisition_id)
+        
+        response_json = utils.delete_json(url)
+        return response_json

@@ -79,7 +79,7 @@ def test_patch_data_location_status(mongo_insert_delete_acq, good_acquisitions):
     for acquisition in good_acquisitions:
         if '_id' in acquisition:
             acquisition.pop('_id')
-                
+
         acquisition_url = os.path.join('api/',
             'acquisition',
             acquisition['acquisition_id'],

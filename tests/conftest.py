@@ -15,9 +15,8 @@ class TestServer:
         self.run_args = [
             'gunicorn',
             'ddbapi.app.app:app',
-            '-b', '0.0.0.0:5001',
+            '-b', '127.0.0.1:5001',
             '-k', 'uvicorn.workers.UvicornWorker',
-            '--daemon'
         ]
         self.proc = None
 
@@ -25,7 +24,7 @@ class TestServer:
         self.proc = Popen(self.run_args)
 
     def stop_proc(self):
-        self.proc.kill()
+        self.proc.terminate()
 
 @pytest.fixture(scope="session", autouse=True)
 def server(request):
