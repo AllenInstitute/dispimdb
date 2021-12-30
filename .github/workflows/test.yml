@@ -39,3 +39,5 @@ jobs:
 
       - name: Test with tox
         run: tox
+        ports:
+          - 5001:5001

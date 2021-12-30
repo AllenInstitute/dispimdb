@@ -15,7 +15,7 @@ class TestServer:
         self.run_args = [
             'gunicorn',
             'ddbapi.app.app:app',
-            '-b', '0.0.0.0:5001',
+            '-b', '127.0.0.1:5001',
             '-k', 'uvicorn.workers.UvicornWorker',
         ]
         self.proc = None
