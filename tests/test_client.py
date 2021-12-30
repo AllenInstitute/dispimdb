@@ -46,7 +46,6 @@ def test_put_data_location(mongo_insert_delete_acq, good_acquisitions):
     }
 
     for acq in good_acquisitions:
-        print(acq)
         if '_id' in acq:
             acq.pop('_id')
         

@@ -1,5 +1,6 @@
 import pytest
 from subprocess import Popen
+import time
 
 import pymongo
 import uvicorn
@@ -31,6 +32,7 @@ def server(request):
     test_server = TestServer()
     print('Starting server')
     test_server.init_proc()
+    time.sleep(5)
 
     def teardown():
         print('Tearing down server')
