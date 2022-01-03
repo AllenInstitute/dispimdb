@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   mongo:
-    image: mongodb
+    image: mongo
   api:
     build:
       context: ./api
@@ -11,6 +11,9 @@ services:
       - mongo
     ports:
       - "5000:5000"
+    environment:
+      - DISPIMDB_MONGO_URI=mongodb://mongo:27017
+      - DISPIMDB_DATABASE_NAME=dispimdb
   webapp:
     build:
       context: ./webapp
@@ -19,3 +22,6 @@ services:
       - mongo
     ports:
       - "8080:8080"
+    environment:
+      - DISPIMDB_MONGO_URI=mongodb://mongo:27017
+      - DISPIMDB_DATABASE_NAME=dispimdb

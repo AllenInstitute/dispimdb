@@ -21,7 +21,7 @@ setup(
     url="https://github.com/samrkinn/dispimdb",
     author="Sam Kinn",
     author_email="samrkinn@gmail.com",
-    packages=["dispimdb_api"],
+    packages=["ddbapi"],
     include_package_data=True,
     install_requires=requirements,
 )

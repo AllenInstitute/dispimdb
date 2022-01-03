@@ -2,13 +2,13 @@ from pydantic import BaseModel, Field
 from typing import Dict, Optional
 
 class StartAcquisitionModel(BaseModel):
-    acquisition_id: str = Field(...)
     section_num: int = Field(...)
     session_id: str = Field(...)
     specimen_id: str = Field(...)
     scope: str = Field(...)
-    acquisition_metadata: dict = Field(...)
     data_location: dict = Field(...)
+    acquisition_metadata: dict = Field(...)
+    acquisition_time_utc: str = Field(...)
     
     class Config:
         schema_extra = {
@@ -25,3 +25,4 @@ class UpdateAcquisitionModel(BaseModel):
     scope: Optional[str]
     acquisition_metadata: Optional[dict]
     data_location: Optional[dict]
+    acquisition_time_utc: Optional[str]
