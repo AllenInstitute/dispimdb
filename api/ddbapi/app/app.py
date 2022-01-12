@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from fastapi import FastAPI, Header, HTTPException
@@ -13,5 +14,6 @@ api.include_router(acquisition.router)
 #api.include_router(session.router)
 #api.include_router(specimen.router)
 
-app = FastAPI()
+ENVIRON_ROOT_PATH = os.getenv("DISPIMDB_ROOT_PATH")
+app = FastAPI(root_path=ENVIRON_ROOT_PATH)
 app.mount('/api', api)
