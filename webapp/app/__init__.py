@@ -36,8 +36,9 @@ def create_app(test_config=None):
     from . import tracker
     app.register_blueprint(tracker.bp)
 
-    from . import tasks
-    app.register_blueprint(tasks.bp)
+    # FIXME are tasks used/necessary?  Task requirements do not install.
+    # from . import tasks
+    # app.register_blueprint(tasks.bp)
 
     from . import viz
     app.register_blueprint(viz.bp)
