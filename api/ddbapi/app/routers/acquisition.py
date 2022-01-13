@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from fastapi import APIRouter, Body, HTTPException, status
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
 from typing import Any, Dict, Optional, List
@@ -47,7 +47,7 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
             'specimen_id': acquisition['specimen_id'],
             'session_id': acquisition['session_id']
         })
-    
+
     acquisition['acquisition_id'] = generate_acquisition_id(acquisition)
 
     new_acquisition = dispimdb['acquisitions'].insert_one(acquisition)
@@ -71,10 +71,10 @@ def get_acquisitions(specimen_id: str):
     for acquisition in acquisition_cursor:
         acquisition.pop('_id')
         acquisitions.append(acquisition['acquisition_id'])
-    
+
     if acquisitions:
         return acquisitions
-    
+
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'No acquisitions found for specimen {specimen_id}')
 
@@ -87,7 +87,7 @@ def get_acquisition(acquisition_id: str):
     if acquisition:
         acquisition.pop('_id')
         return acquisition
-    
+
     raise HTTPException(status_code=404,
         detail=f'Acquisition {acquisition_id} not found')
 
@@ -100,16 +100,16 @@ def query_acquisition(query: dict):
     for acq in acq_cursor:
         acq.pop('_id')
         acquisitions.append(acq)
-    
+
     return acquisitions
 
 '''
 @router.put('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
-def update_acquisition(acquisition_id: str, 
+def update_acquisition(acquisition_id: str,
                        acquisition: UpdateAcquisitionModel = Body(...)):
     acquisition = {k: v for k, v in acquisition.dict().items() if v is not None}
-    
+
     if len(acquisition) >= 1:
         update_result = dispimdb['acquisitions'].update_one({
             'acquisition_id': acquisition_id
@@ -123,7 +123,7 @@ def update_acquisition(acquisition_id: str,
             updated_acquisition.pop('_id')
             return JSONResponse(status_code=status.HTTP_200_OK,
                 content=updated_acquisition)
-        
+
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')
 
@@ -131,7 +131,7 @@ def update_acquisition(acquisition_id: str,
     tags=['acquisitions'])
 def patch_acquisition(acquisition_id: str,
                       data: dict):
-    
+
     if len(data) >= 1:
         update_result = dispimdb['acquisitions'].update_one({
             'acquisition_id': acquisition_id
@@ -145,7 +145,7 @@ def patch_acquisition(acquisition_id: str,
             updated_acquisition.pop('_id')
             return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
                 content=updated_acquisition)
-        
+
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')
 '''
@@ -163,7 +163,7 @@ def patch_data_location_status(acquisition_id: str,
     if not state in states:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
             detail=f'State {state} does not exist')
-    
+
     current_state = acquisition['data_location'][data_key]['status']
     if not state in allowed_transitions[current_state]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -174,7 +174,7 @@ def patch_data_location_status(acquisition_id: str,
         {"acquisition_id": acquisition_id},
         {"$set": {update_field: state}},
     )
-    
+
     updated_acquisition = dispimdb["acquisitions"].find_one({
         "acquisition_id": acquisition_id
     })
@@ -216,7 +216,7 @@ def delete_acquisition(acquisition_id: str):
     })
 
     if delete_result.deleted_count >= 1:
-        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
-        
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')
