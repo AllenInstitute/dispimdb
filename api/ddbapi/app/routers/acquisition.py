@@ -8,7 +8,7 @@ from bson import ObjectId
 from typing import Any, Dict, Optional, List
 from starlette.status import HTTP_201_CREATED
 
-from ddbapi.db.db import dispimdb
+from ddbapi.db.db import dispimdb_mongo
 from ddbapi.db.states import states, allowed_transitions
 from ddbapi.app.models.acquisition import (
     StartAcquisitionModel,
@@ -37,24 +37,33 @@ router = APIRouter()
 def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
     acquisition = jsonable_encoder(acquisition)
 
-    if not dispimdb['specimens'].find_one({'specimen_id': acquisition['specimen_id']}):
-        dispimdb['specimens'].insert_one({
-            'specimen_id': acquisition['specimen_id']
-        })
+    if not dispimdb_mongo.find_one(
+            'specimens', {'specimen_id': acquisition['specimen_id']}):
+        dispimdb_mongo.insert_one(
+            "specimens",
+            {
+                'specimen_id': acquisition['specimen_id']
+            })
 
-    if not dispimdb['specimens'].find_one({'session_id': acquisition['session_id']}):
-        dispimdb['sessions'].insert_one({
-            'specimen_id': acquisition['specimen_id'],
-            'session_id': acquisition['session_id']
-        })
+    if not dispimdb_mongo.find_one(
+            "specimens", {'session_id': acquisition['session_id']}):
+        dispimdb_mongo.insert_one(
+            "sessions",
+            {
+                'specimen_id': acquisition['specimen_id'],
+                'session_id': acquisition['session_id']
+            })
 
     acquisition['acquisition_id'] = generate_acquisition_id(acquisition)
 
-    new_acquisition = dispimdb['acquisitions'].insert_one(acquisition)
+    new_acquisition = dispimdb_mongo.insert_one(
+        "acquisitions", acquisition)
 
-    created_acquisition = dispimdb['acquisitions'].find_one({
-        '_id': new_acquisition.inserted_id
-    })
+    created_acquisition = dispimdb_mongo.find_one(
+        "acquisitions",
+        {
+            '_id': new_acquisition.inserted_id
+        })
     created_acquisition.pop('_id')
 
     return JSONResponse(status_code=HTTP_201_CREATED,
@@ -63,14 +72,13 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
 @router.get('/{specimen_id}/acquisitions',
     tags=['acquisitions'])
 def get_acquisitions(specimen_id: str):
-    acquisitions = []
-    acquisition_cursor = dispimdb['acquisitions'].find({
-        'specimen_id': specimen_id
-    })
+    acquisition_objects = dispimdb_mongo.find_list(
+        "acquisitions",
+        {
+            'specimen_id': specimen_id
+        }, projection={"_id": False, "acquisition_id": True})
 
-    for acquisition in acquisition_cursor:
-        acquisition.pop('_id')
-        acquisitions.append(acquisition['acquisition_id'])
+    acquisitions = [acq["acquisition_id"] for acq in acquisition_objects]
 
     if acquisitions:
         return acquisitions
@@ -81,8 +89,8 @@ def get_acquisitions(specimen_id: str):
 @router.get('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
 def get_acquisition(acquisition_id: str):
-    acquisition = dispimdb['acquisitions'].find_one({
-        'acquisition_id': acquisition_id})
+    acquisition = dispimdb_mongo.find_one(
+        "acquisitions", {'acquisition_id': acquisition_id})
 
     if acquisition:
         acquisition.pop('_id')
@@ -95,7 +103,7 @@ def get_acquisition(acquisition_id: str):
     tags=['acquisitions'])
 def query_acquisition(query: dict):
     acquisitions = []
-    acq_cursor = dispimdb['acquisitions'].find(dict)
+    acq_cursor = dispimdb_mongo.find("acquisitions", dict)
 
     for acq in acq_cursor:
         acq.pop('_id')
@@ -156,9 +164,11 @@ def patch_data_location_status(acquisition_id: str,
                                data_key: str,
                                state: str):
 
-    acquisition = dispimdb["acquisitions"].find_one({
-        "acquisition_id": acquisition_id
-    })
+    acquisition = dispimdb_mongo.find_one(
+        "acquisitions",
+        {
+            "acquisition_id": acquisition_id
+        })
 
     if not state in states:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -170,14 +180,17 @@ def patch_data_location_status(acquisition_id: str,
             detail=f'State transition not allowed')
 
     update_field = f"data_location.{data_key}.status"
-    updated_doc = dispimdb["acquisitions"].update_one(
+    updated_doc = dispimdb_mongo.update_one(
+        "acquisitions",
         {"acquisition_id": acquisition_id},
         {"$set": {update_field: state}},
     )
 
-    updated_acquisition = dispimdb["acquisitions"].find_one({
-        "acquisition_id": acquisition_id
-    })
+    updated_acquisition = dispimdb_mongo.find_one(
+        "acquisitions",
+        {
+            "acquisition_id": acquisition_id
+        })
     updated_acquisition.pop('_id')
     return JSONResponse(status_code=status.HTTP_200_OK,
         content=updated_acquisition)
@@ -187,23 +200,28 @@ def patch_data_location_status(acquisition_id: str,
 def put_data_location(acquisition_id: str,
                       data_key: str,
                       request: Dict[Any, Any]):
-    acquisition = dispimdb["acquisitions"].find_one({
-        "acquisition_id": acquisition_id
-    })
+    acquisition = dispimdb_mongo.find_one(
+        "acquisitions",
+        {
+            "acquisition_id": acquisition_id
+        })
 
     if data_key in acquisition["data_location"]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
             detail=f'Data location already exists')
 
     update_field = f"data_location.{data_key}"
-    updated_doc = dispimdb["acquisitions"].update_one(
+    updated_doc = dispimdb_mongo.update_one(
+         "acquisitions",
          {"acquisition_id": acquisition_id},
          {"$set": {update_field: request}},
     )
 
-    updated_acquisition = dispimdb["acquisitions"].find_one({
-        "acquisition_id": acquisition_id
-    })
+    updated_acquisition = dispimdb_mongo.find_one(
+        "acquisitions",
+        {
+            "acquisition_id": acquisition_id
+        })
     updated_acquisition.pop('_id')
     return JSONResponse(status_code=status.HTTP_200_OK,
         content=updated_acquisition)
@@ -211,9 +229,11 @@ def put_data_location(acquisition_id: str,
 @router.delete('/acquisition/{acquisition_id}',
     tags=['acquisitions'])
 def delete_acquisition(acquisition_id: str):
-    delete_result = dispimdb['acquisitions'].delete_many({
-        'acquisition_id': acquisition_id
-    })
+    delete_result = dispimdb_mongo.delete_many(
+        "acquisitions",
+        {
+            'acquisition_id': acquisition_id
+        })
 
     if delete_result.deleted_count >= 1:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
