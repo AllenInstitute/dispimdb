@@ -85,6 +85,57 @@ def test_patch_data_location_status(
         assert new_state == response_json['data_location'][data_key]['status']
 
 
+def test_bad_transition_patch_data_location_status(
+        apiclient, databased_good_acquisitions):
+    data_key = "tiff_directory"
+    new_state = "NOT_STARTED"
+
+    for acq in databased_good_acquisitions:
+        with pytest.raises(Exception):
+            rj = apiclient.acquisition.patch_status(
+                acq['acquisition_id'],
+                data_key,
+                new_state
+            )
+
+        db_acq = apiclient.acquisition.get(acq["acquisition_id"])
+        assert (db_acq["data_location"][data_key]["status"] ==
+                acq["data_location"][data_key]["status"])
+
+
+def test_bad_acquisition_patch_data_location_status(
+        apiclient, databased_good_acquisitions):
+    data_key = "tiff_directory"
+    new_state = "IN_PROGRESS"
+
+    acquisition_id = "not_an_acqid"
+
+    with pytest.raises(Exception):
+        rj = apiclient.acquisition.patch_status(
+            acquisition_id,
+            data_key,
+            new_state
+        )
+
+
+def test_bad_state_patch_data_location_status(
+        apiclient, databased_good_acquisitions):
+    data_key = "tiff_directory"
+    new_state = "NOT_A_STATE"
+
+    for acq in databased_good_acquisitions:
+        with pytest.raises(Exception):
+            rj = apiclient.acquisition.patch_status(
+                acq['acquisition_id'],
+                data_key,
+                new_state
+            )
+
+        db_acq = apiclient.acquisition.get(acq["acquisition_id"])
+        assert (db_acq["data_location"][data_key]["status"] ==
+                acq["data_location"][data_key]["status"])
+
+
 def test_delete_acquisition(
         apiclient, databased_good_acquisitions):
     for acq in databased_good_acquisitions:
