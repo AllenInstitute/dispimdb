@@ -8,7 +8,7 @@ celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_object(DevelopmentConfig)
+    app.config.from_object(Config)
 
     celery.conf.update(app.config)
     
@@ -23,9 +23,6 @@ def create_app(test_config=None):
     from . import base
     app.register_blueprint(base.bp)
 
-    from . import api
-    app.register_blueprint(api.bp)
-
     from . import auth
     app.register_blueprint(auth.bp)
 
@@ -34,8 +31,5 @@ def create_app(test_config=None):
 
     from . import tasks
     app.register_blueprint(tasks.bp)
-
-    from . import viz
-    app.register_blueprint(viz.bp)
 
     return app

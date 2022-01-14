@@ -1,0 +1,16 @@
+# Start mongodb server
+sudo service mongodb start
+
+# Restart nginx server after changes
+sudo service nginx restart
+
+# Start rabbitmq server
+sudo service rabbitmq-server start
+
+# Start celery worker
+# Run from /home/samk/acworkflow
+celery -A celery_worker.celery worker --loglevel=INFO
+
+# Start flower server
+# Run from /home/samk/acworkflow
+flower -A app.tasks.celery --port=5556 --url-prefix=flower

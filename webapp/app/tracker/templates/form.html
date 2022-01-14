@@ -1,16 +1,18 @@
 {% macro field(field_name, field_options) %}
   <div class="mb-3">
-    <label for="{{ field_name }}" class="form-label">{{ field_options['display_name'] }}</label>
     {% if field_options['field_type'] == 'id_input' %}
+      <label for="{{ field_name }}" class="form-label">{{ field_options['display_name'] }} (must be unique)</label>
       <input name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:25%" 
         value="{{ form_values[field_name] }}" required
         {% if form_values[field_name] != "" and not field_options['editable'] %}readonly{% endif %}>
     
     {% elif field_options['field_type'] == 'input' %}
+      <label for="{{ field_name }}" class="form-label">{{ field_options['display_name'] }}</label>
       <input name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:25%"
         value="{{ form_values[field_name] }}">
 
     {% elif field_options['field_type'] == 'select' %}
+      <label for="{{ field_name }}" class="form-label">{{ field_options['display_name'] }}</label>
       <select name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:auto">
         {% for option_value in form_select_values[field_name] %}
           <option value="{{ option_value }}" {% if form_values[field_name] == option_value %}selected{% endif %}>
@@ -20,9 +22,11 @@
       </select>
 
     {% elif field_options['field_type'] == 'textarea' %}
+      <label for="{{ field_name }}" class="form-label">{{ field_options['display_name'] }}</label>
       <textarea name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:25%" rows="2">{{ form_values[field_name] }}</textarea>
     
     {% elif field_options['field_type'] == 'select_input' %}
+      <label for="{{ field_name }}" class="form-label">{{ field_options['display_name'] }}</label>
       <select name="{{ field_name ~ '_select' }}" id="{{ field_name ~ '_select' }}" class="form-control" style="width:auto">
         {% for option_value in form_select_values[field_name] %}
           <option value="{{ option_value }}" {% if form_values[field_name] == option_value %}selected{% endif %}>{{ option_value }}</option>
@@ -33,6 +37,7 @@
         value="{{ form_values[field_name] }}">
     
     {% elif field_options['field_type'] == 'input_date' %}
+      <label for="{{ field_name }}" class="form-label">{{ field_options['display_name'] }} (mm/dd/yy, e.g. 04/20/21)</label>
       <input name="{{ field_name }}" id="{{ field_name }}" class="form-control" style="width:25%"
         value="{{ form_values[field_name] }}">
 
@@ -45,7 +50,7 @@
 
 <form method="post">
   <div class="form-group">
-    {% for field_name, field_options in form_dict.items() %}
+    {% for field_name, field_options in form_dict['data_fields'].items() %}
       {{ field(field_name, field_options) }}
     {% endfor %}
 

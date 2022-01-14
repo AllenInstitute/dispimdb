@@ -1,4 +1,5 @@
 import datetime
+import glob
 import io
 import json
 import math
@@ -35,11 +36,12 @@ default_section = {
     "last_modified_by": ""
 }
 
-@bp.route("/sections/update", methods=("GET", "POST"))
-@bp.route("/sections/<specimen_id>/update", methods=("GET", "POST"))
-@bp.route("/sections/<specimen_id>/<section_num>/update", methods=("GET", "POST"))
+@bp.route("/new_section", methods=("GET", "POST"))
+@bp.route("/<specimen_id>/new_section", methods=("GET", "POST"))
+@bp.route("/<specimen_id>/<section_num>/update", methods=("GET", "POST"))
+@bp.route("/<specimen_id>/<section_num>/update/<action>", methods=("GET", "POST"))
 @login_required
-def section_update(specimen_id=None, section_num=None):
+def section_update(specimen_id=None, section_num=None, action=None):
     db = get_db()
     projects = db.projects
     specimens = db.specimens
@@ -57,7 +59,6 @@ def section_update(specimen_id=None, section_num=None):
         project_ids.append(project["project_id"])
 
     specimens_dict = specimens.find({})
-    print(specimens_dict)
     specimen_ids = []
     for specimen in specimens_dict:
         specimen_ids.append(specimen["specimen_id"])
@@ -68,9 +69,12 @@ def section_update(specimen_id=None, section_num=None):
             "specimen_id": specimen_id
         })
     else:
-        section_dict = default_section
+        section_dict = default_section.copy()
+    
+    if specimen_id is not None:
+        section_dict["specimen_id"] = specimen_id
 
-    if "duplicate" in request.args:
+    if action == "duplicate":
         section_dict["section_num"] = ""
     
     if request.method == "POST":
@@ -93,15 +97,13 @@ def section_update(specimen_id=None, section_num=None):
             section_dict["last_modified_by"] = g.user
             section_dict["last_modified"] = datetime.datetime.now()
 
-            if section_num is None:
+            if section_num is None or action == "duplicate":
                 section_dict["added_by"] = g.user
                 section_dict["date_added"] = datetime.datetime.now()
                 section_nums_list = parse_section_nums(request.form["section_num"])
-                print(section_nums_list)
                 for num in section_nums_list:
                     section_dict["section_num"] = str(num)
                     section_dict.pop("_id") if "_id" in section_dict else None
-                    print(section_dict)
                     result = sections.insert_one(section_dict)
 
                     image_path = os.path.join(current_app.config['IMAGE_UPLOAD_PATH'],
@@ -122,18 +124,20 @@ def section_update(specimen_id=None, section_num=None):
                     request.form["specimen_id"],
                     section_num)
                 
+                if not os.path.exists(image_path):
+                    os.makedirs(image_path)
+                                
                 for uploaded_image in request.files.getlist("image_files"):
                     outpath = os.path.join(image_path, uploaded_image.filename)
                     if uploaded_image.filename != "":
                         try:
-                            print(outpath)
                             Image.open(uploaded_image).save(outpath)
-                        except OSError:
+                        except OSError as error:
+                            print(error)
                             print("cannot create ", uploaded_image)
             
-            print(result)
-
-            return redirect(url_for("tracker.section_overview"))
+            return redirect(url_for("tracker.specimen_view",
+                                    specimen_id=section_dict["specimen_id"]))
     
     return render_template("section/update.html",
         section_dict=section_dict,
@@ -141,22 +145,26 @@ def section_update(specimen_id=None, section_num=None):
         project_ids=project_ids,
         dropdown_dict=dropdown_dict)
 
-@bp.route("/section/delete/<specimen_id>/<section_num>", methods=("GET", "POST"))
+@bp.route("/<specimen_id>/<section_num>/delete", methods=("GET", "POST"))
 @login_required
 def section_delete(specimen_id=None, section_num=None):
     db = get_db()
     sections = db.sections
 
+    section_dict = sections.find_one({
+        "specimen_id": specimen_id,
+        "section_num": section_num
+    })
+
     result = sections.delete_one({
         "specimen_id": specimen_id,
         "section_num": section_num
     })
-    print(result)
 
-    return redirect(url_for("tracker.section_overview"))
+    return redirect(url_for("tracker.specimen_view",
+                            specimen_id=section_dict["specimen_id"]))
 
-@bp.route("/section", methods=("GET", "POST"))
-@bp.route("/section/overview", methods=("GET", "POST"))
+@bp.route("/overview/sections", methods=("GET", "POST"))
 def section_overview():
     db = get_db()
     sections = db.sections
@@ -166,33 +174,63 @@ def section_overview():
     return render_template("section/overview.html",
         section_list=section_list)
 
-@bp.route("/section/view/<specimen_id>/<section_num>", methods=("GET", "POST"))
+@bp.route("/<specimen_id>/<section_num>", methods=("GET", "POST"))
 def section_view(specimen_id=None, section_num=None):
     db = get_db()
     sections = db.sections
+    specimens = db.specimens
 
     section_dict = sections.find_one({
         "specimen_id": specimen_id,
         "section_num": section_num
     })
 
-    thumbnail_dir = os.path.join("images",
+    specimen_dict = specimens.find_one({
+        "specimen_id": section_dict["specimen_id"]
+    })
+    project_id = specimen_dict["project_id"]
+
+    thumbnail_dir = os.path.join("/images",
         section_dict["specimen_id"],
-        section_dict["section_num"])
-    
+        section_dict["section_num"],
+        "thumb_gif")
+        
     try:
-        thumbnail_fn = os.listdir(os.path.join(os.getcwd(),
-            "app", "static",
-            thumbnail_dir))[0]
+        thumbnail_fn = os.listdir('/home/samk' + thumbnail_dir)[0]
         thumbnail_path = os.path.join(thumbnail_dir, thumbnail_fn)
     except:
         thumbnail_path = ""
+        
+    # image_list should be list of dicts
+    image_list = []
+    image_files = []
+    image_path = os.path.join(current_app.config['IMAGE_UPLOAD_PATH'],
+                    section_dict["specimen_id"],
+                    section_dict["section_num"])
     
-    print(thumbnail_path)
+    for file_ext in current_app.config['ALLOWED_IMAGE_EXT']:
+        image_files += glob.glob(os.path.join(image_path, '*.' + file_ext))
+        image_files += glob.glob(os.path.join(image_path, '*.' + file_ext.upper()))
     
+    img_rel_dir = os.path.join(current_app.config['IMAGE_URL'],
+                    section_dict["specimen_id"],
+                    section_dict["section_num"])
+
+    for image_file in image_files:
+        image_dict = {
+            'img_rel_path': os.path.join(img_rel_dir, image_file.split('/')[-1]),
+            'img_filename': image_file.split('/')[-1],
+            'date_added': '',
+            'notes': ''
+        }
+
+        image_list.append(image_dict)
+            
     return render_template("section/view.html",
         section_dict=section_dict,
-        thumbnail_path=thumbnail_path)
+        image_list=image_list,
+        thumbnail_path=thumbnail_path,
+        project_id=project_id)
 
 def section_table(specimen_id=None):
     db = get_db()

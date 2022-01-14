@@ -51,10 +51,6 @@ def generate_gif():
         run(os.path.join(mntpath, subpath),savepath,savename)
 
 @celery.task
-def generate_gifs_ijm(input):
-    imagej.run_imagej(ijm_input=input, script='macro')
-
-@celery.task
 def slice_tiff_to_n5():
     script_dir = ""
     input_dir = ""
@@ -88,13 +84,5 @@ def n5_scale_pyramid():
     subprocess.run(cmd)
 
 @celery.task
-def add(x, y):
-    return x + y
-
-@celery.task
-def mul(x, y):
-    return x * y
-
-@celery.task
-def xsum(numbers):
-    return sum(numbers)
+def run_imagej_job():
+    imagej.run_imagej(ijm_input=imagej.test_input, script='macro')

@@ -8,7 +8,8 @@ class Config(object):
     DATABASE_URI = 'mongodb://localhost:27017'
     DATABASE_NAME = 'dispimdb'
     #IMAGE_UPLOAD_PATH = '/home/samk/acworkflow_storage/images'
-    IMAGE_UPLOAD_PATH = '/images'
+    IMAGE_UPLOAD_PATH = '/home/samk/images'
+    IMAGE_URL = '/images'
     ALLOWED_IMAGE_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 
     CELERY_BROKER_URL = 'amqp://'
@@ -27,4 +28,4 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    DATABASE_NAME = 'dispimdb_test'
+    DATABASE_NAME = 'test_dispimdb'
