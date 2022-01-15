@@ -1,20 +1,16 @@
-import os
 from datetime import datetime
 
 from fastapi import APIRouter, Body, HTTPException, status
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
-from bson import ObjectId
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict
 from starlette.status import HTTP_201_CREATED
 import pymongo
 
 from ddbapi.db.db import dispimdb_mongo
 from ddbapi.db.states import data_location_state_table
-from ddbapi.app.models.acquisition import (
-    StartAcquisitionModel,
-    UpdateAcquisitionModel
-)
+from ddbapi.app.models.acquisition import StartAcquisitionModel
+
 
 def generate_acquisition_id(acquisition):
     dt = datetime.fromisoformat(
@@ -27,14 +23,17 @@ def generate_acquisition_id(acquisition):
         dt_string
     )))
 
+
 def acquisition_with_id(acquisition):
     acq_id = generate_acquisition_id(acquisition)
     return dict(acquisition, **{'_id': acq_id})
 
+
 router = APIRouter()
 
+
 @router.post('/new_acquisition',
-    tags=['acquisitions'])
+             tags=['acquisitions'])
 def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
     acquisition = jsonable_encoder(acquisition)
 
@@ -67,11 +66,13 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
         })
     created_acquisition.pop('_id')
 
-    return JSONResponse(status_code=HTTP_201_CREATED,
+    return JSONResponse(
+        status_code=HTTP_201_CREATED,
         content=created_acquisition)
 
+
 @router.get('/{specimen_id}/acquisitions',
-    tags=['acquisitions'])
+            tags=['acquisitions'])
 def get_acquisitions(specimen_id: str):
     acquisition_objects = dispimdb_mongo.find_list(
         "acquisitions",
@@ -84,11 +85,13 @@ def get_acquisitions(specimen_id: str):
     if acquisitions:
         return acquisitions
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
         detail=f'No acquisitions found for specimen {specimen_id}')
 
+
 @router.get('/acquisition/{acquisition_id}',
-    tags=['acquisitions'])
+            tags=['acquisitions'])
 def get_acquisition(acquisition_id: str):
     acquisition = dispimdb_mongo.find_one(
         "acquisitions", {'acquisition_id': acquisition_id})
@@ -97,11 +100,13 @@ def get_acquisition(acquisition_id: str):
         acquisition.pop('_id')
         return acquisition
 
-    raise HTTPException(status_code=404,
+    raise HTTPException(
+        status_code=404,
         detail=f'Acquisition {acquisition_id} not found')
 
+
 @router.get('/acquisition/query',
-    tags=['acquisitions'])
+            tags=['acquisitions'])
 def query_acquisition(query: dict):
     acquisitions = []
     acq_cursor = dispimdb_mongo.find("acquisitions", dict)
@@ -111,53 +116,6 @@ def query_acquisition(query: dict):
         acquisitions.append(acq)
 
     return acquisitions
-
-'''
-@router.put('/acquisition/{acquisition_id}',
-    tags=['acquisitions'])
-def update_acquisition(acquisition_id: str,
-                       acquisition: UpdateAcquisitionModel = Body(...)):
-    acquisition = {k: v for k, v in acquisition.dict().items() if v is not None}
-
-    if len(acquisition) >= 1:
-        update_result = dispimdb['acquisitions'].update_one({
-            'acquisition_id': acquisition_id
-        }, {'$set': acquisition})
-
-        updated_acquisition = dispimdb['acquisitions'].find_one({
-            'acquisition_id': acquisition_id
-        })
-
-        if update_result.modified_count == 1 and updated_acquisition:
-            updated_acquisition.pop('_id')
-            return JSONResponse(status_code=status.HTTP_200_OK,
-                content=updated_acquisition)
-
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-        detail=f'Acquisition {acquisition_id} not found')
-
-@router.patch('/acquisition/{acquisition_id}',
-    tags=['acquisitions'])
-def patch_acquisition(acquisition_id: str,
-                      data: dict):
-
-    if len(data) >= 1:
-        update_result = dispimdb['acquisitions'].update_one({
-            'acquisition_id': acquisition_id
-        }, {'$set': data})
-
-        updated_acquisition = dispimdb['acquisitions'].find_one({
-            'acquisition_id': acquisition_id
-        })
-
-        if update_result.modified_count == 1 and updated_acquisition:
-            updated_acquisition.pop('_id')
-            return JSONResponse(status_code=status.HTTP_202_ACCEPTED,
-                content=updated_acquisition)
-
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-        detail=f'Acquisition {acquisition_id} not found')
-'''
 
 
 @router.patch(('/acquisition/{acquisition_id}/data_location/{data_key}'
@@ -210,11 +168,12 @@ def put_data_location(acquisition_id: str,
         })
 
     if data_key in acquisition["data_location"]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Data location already exists')
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Data location already exists')
 
     update_field = f"data_location.{data_key}"
-    updated_doc = dispimdb_mongo.update_one(
+    _ = dispimdb_mongo.update_one(
          "acquisitions",
          {"acquisition_id": acquisition_id},
          {"$set": {update_field: request}},
@@ -226,11 +185,13 @@ def put_data_location(acquisition_id: str,
             "acquisition_id": acquisition_id
         })
     updated_acquisition.pop('_id')
-    return JSONResponse(status_code=status.HTTP_200_OK,
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
         content=updated_acquisition)
 
+
 @router.delete('/acquisition/{acquisition_id}',
-    tags=['acquisitions'])
+               tags=['acquisitions'])
 def delete_acquisition(acquisition_id: str):
     delete_result = dispimdb_mongo.delete_many(
         "acquisitions",
@@ -241,5 +202,6 @@ def delete_acquisition(acquisition_id: str):
     if delete_result.deleted_count >= 1:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')

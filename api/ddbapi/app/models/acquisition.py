@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Dict, Optional
+from typing import Optional
+
 
 class StartAcquisitionModel(BaseModel):
     section_num: int = Field(...)
@@ -9,13 +10,13 @@ class StartAcquisitionModel(BaseModel):
     data_location: dict = Field(...)
     acquisition_metadata: dict = Field(...)
     acquisition_time_utc: str = Field(...)
-    
+
     class Config:
         schema_extra = {
             'example': {
-            
             }
         }
+
 
 class UpdateAcquisitionModel(BaseModel):
     acquisition_id: Optional[str]

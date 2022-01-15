@@ -5,6 +5,7 @@ def ResponseModel(data, message):
         'message': message
     }
 
+
 def ErrorResponseModel(error, code, message):
     return {
         'error': error,
