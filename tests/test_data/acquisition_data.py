@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 def generate_acquisition_id(acquisition):
     dt = datetime.fromisoformat(
         acquisition['acquisition_time_utc'])
@@ -10,6 +11,7 @@ def generate_acquisition_id(acquisition):
         acquisition['session_id'],
         dt_string
     )))
+
 
 acq_good_doc = [
     {
