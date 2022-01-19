@@ -142,3 +142,20 @@ def test_delete_acquisition(
         response_json = apiclient.acquisition.delete(acq['acquisition_id'])
 
         assert response_json is None
+
+
+def test_query_acquisitions(
+        apiclient, databased_good_acquisitions):
+    acquisitions_copy = copy.deepcopy(databased_good_acquisitions)
+    acq_ids = [acq["acquisition_id"] for acq in acquisitions_copy][:-1]
+
+    query = {
+        "filter": {"acquisition_id": {"$in": acq_ids}},
+        "projection": {"_id": False}
+    }
+    results = apiclient.acquisition.query(query)
+
+    result_acq_ids = [racq["acquisition_id"] for racq in results]
+    assert result_acq_ids == acq_ids
+
+    assert all([racq.get("_id") is None for racq in results])

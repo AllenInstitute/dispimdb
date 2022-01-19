@@ -10,6 +10,7 @@ import pymongo
 from ddbapi.db.db import dispimdb_mongo
 from ddbapi.db.states import data_location_state_table
 from ddbapi.app.models.acquisition import StartAcquisitionModel
+from ddbapi.app.models.base import MongoQueryModel
 
 
 def generate_acquisition_id(acquisition):
@@ -105,17 +106,18 @@ def get_acquisition(acquisition_id: str):
         detail=f'Acquisition {acquisition_id} not found')
 
 
-@router.get('/acquisition/query',
-            tags=['acquisitions'])
-def query_acquisition(query: dict):
-    acquisitions = []
-    acq_cursor = dispimdb_mongo.find("acquisitions", dict)
-
-    for acq in acq_cursor:
-        acq.pop('_id')
-        acquisitions.append(acq)
-
-    return acquisitions
+@router.put("/acquisition/query", tags=["acquisitions"])
+def query_acquisitions(query: MongoQueryModel = Body(...)):
+    query_dict = jsonable_encoder(query)
+    try:
+        results = dispimdb_mongo.find_list("acquisitions", **query_dict)
+        return JSONResponse(
+            status_code=200,
+            content=results)
+    except pymongo.errors.ExecutionTimeout:  # pragma: no cover
+        return HTTPException(
+            status_code=500,
+            detail=f"querying timed out. query dict: {query_dict}")
 
 
 @router.patch(('/acquisition/{acquisition_id}/data_location/{data_key}'

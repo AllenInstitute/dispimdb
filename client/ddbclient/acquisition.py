@@ -160,7 +160,7 @@ class AcquisitionClient:
             'acquisition',
             'query')
 
-        response_json = utils.get_json(url, query_dict)
+        response_json = utils.put_json(url, query_dict)
         return response_json
 
     def put_data_location(self, acquisition_id, data_key, data_location):
