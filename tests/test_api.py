@@ -112,8 +112,7 @@ def test_put_existing_data_location(databased_good_acquisitions):
 
     response = client.put(url, json=updated_dict)
 
-    assert response.status_code == 400
-
+    assert response.status_code == 409
 
 
 def test_patch_data_location_status(
