@@ -1,22 +1,11 @@
-states = [
-    'NOT_STARTED',
-    'STARTED',
-    'IN_PROGRESS',
-    'COMPLETED',
-    'STOPPED',
-    'ERROR'
-]
-
-allowed_transitions = {
-    'NOT_STARTED': ['STARTED', 'ERROR'],
-    'STARTED': ['IN_PROGRESS', 'ERROR'],
-    'IN_PROGRESS': ['COMPLETED', 'STOPPED', 'ERROR'],
-    'COMPLETED': ['NOT_STARTED'],
-    'STOPPED': ['ERROR', 'NOT_STARTED' 'STARTED'],
-    'ERROR': ['STOPPED'],
+data_location_allowed_transitions = {
+    "CREATING": ["CREATE_ERROR", "COMPLETE"],
+    "CREATE_ERROR": ["CREATING", "DELETING"],
+    "COMPLETE": ["DELETING"],
+    "DELETING": ["DELETE_ERROR", "DELETED"],
+    "DELETE_ERROR": ["CREATING", "DELETING"],
+    "DELETED": ["CREATING"]
 }
-
-data_location_allowed_transitions = allowed_transitions
 
 
 class StateTable:
@@ -57,3 +46,5 @@ class StateTable:
 
 data_location_state_table = StateTable.from_dict(
     data_location_allowed_transitions)
+
+__all__ = ["StateTable", "data_location_state_table"]
