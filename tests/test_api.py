@@ -96,6 +96,26 @@ def test_put_data_location(mongo_insert_delete_acq, good_acquisitions):
         assert response.status_code == 200
 
 
+def test_put_existing_data_location(databased_good_acquisitions):
+    acq = databased_good_acquisitions[-1]
+
+    acq_id = acq['acquisition_id']
+    location_key, location_dict = next(iter(
+        acq["data_location"].items()))
+
+    updated_dict = copy.deepcopy(dict(
+        location_dict, **{
+            "uri": location_dict["uri"] + "NOT"
+            }))
+
+    url = f"api/acquisition/{acq_id}/data_location/{location_key}"
+
+    response = client.put(url, json=updated_dict)
+
+    assert response.status_code == 400
+
+
+
 def test_patch_data_location_status(
         mongo_insert_delete_acq, good_acquisitions):
     data_key = 'tiff_directory'
