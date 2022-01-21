@@ -66,7 +66,7 @@ def test_put_data_location(
         apiclient, databased_good_acquisitions):
     data_key = 'n5_directory'
     n5_directory = {
-        'name': 'my_n5_dir',
+        'uri': 'my_n5_dir',
         'status': 'CREATING'
     }
 

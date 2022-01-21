@@ -74,7 +74,7 @@ def test_get_acquisition(mongo_insert_delete_acq, good_acquisitions):
 
 def test_put_data_location(mongo_insert_delete_acq, good_acquisitions):
     n5_directory = {
-        'name': 'my_n5_dir',
+        'uri': 'file:///path/to/my_n5_dir',
         'status': 'CREATING'
     }
 
