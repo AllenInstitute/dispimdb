@@ -1,7 +1,13 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict
 
 from pydantic import BaseModel, Field
+
+
+class DataLocationModel(BaseModel):
+    status: Optional[str] = Field(...)
+    uri: str = Field(...)
+    metadata: Optional[dict] = Field({})
 
 
 class StartAcquisitionModel(BaseModel):
@@ -9,7 +15,7 @@ class StartAcquisitionModel(BaseModel):
     session_id: str = Field(...)
     specimen_id: str = Field(...)
     scope: str = Field(...)
-    data_location: Optional[dict] = Field({})
+    data_location: Optional[Dict[str, DataLocationModel]] = Field({})
     acquisition_metadata: Optional[dict] = Field({})
     acquisition_time_utc: datetime = Field(...)
 

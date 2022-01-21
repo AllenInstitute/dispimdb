@@ -9,7 +9,8 @@ import pymongo
 
 from ddbapi.db.db import dispimdb_mongo
 from ddbapi.db.states import data_location_state_table
-from ddbapi.app.models.acquisition import StartAcquisitionModel
+from ddbapi.app.models.acquisition import (
+    StartAcquisitionModel, DataLocationModel)
 from ddbapi.app.models.base import MongoQueryModel
 
 
@@ -163,7 +164,8 @@ def patch_data_location_status(acquisition_id: str,
             tags=["acquisitions"])
 def put_data_location(acquisition_id: str,
                       data_key: str,
-                      request: Dict[Any, Any]):
+                      location: DataLocationModel = Body(...)):
+    location_dict = jsonable_encoder(location)
     acquisition = dispimdb_mongo.find_one(
         "acquisitions",
         {
@@ -179,7 +181,7 @@ def put_data_location(acquisition_id: str,
     _ = dispimdb_mongo.update_one(
          "acquisitions",
          {"acquisition_id": acquisition_id},
-         {"$set": {update_field: request}},
+         {"$set": {update_field: location_dict}},
     )
 
     updated_acquisition = dispimdb_mongo.find_one(
