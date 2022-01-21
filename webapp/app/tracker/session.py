@@ -19,7 +19,6 @@ from PIL import Image
 
 from app.auth import login_required
 from app.db import get_db, query_mongo
-from app import tasks
 
 from . import bp, project, section, specimen
 

@@ -29,7 +29,4 @@ def create_app(test_config=None):
     from . import tracker
     app.register_blueprint(tracker.bp)
 
-    from . import tasks
-    app.register_blueprint(tasks.bp)
-
     return app

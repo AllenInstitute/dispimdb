@@ -16,7 +16,6 @@ from werkzeug.exceptions import abort
 from app.auth import login_required
 from app.db import get_db, query_mongo
 from app.forms import ProjectForm
-from dispimdb import dispimdb
 
 from . import bp, session, section, specimen
 
@@ -85,36 +84,6 @@ project_data_config = {
         }
     }
 }
-
-project_table_config = {
-
-}
-
-class ProjectCollection(dispimdb.DispimDbCollection):
-    def __init__(self):
-        pass
-
-class Project:
-    def __init__(self, project_dict=default_project):
-        self.form = ProjectForm()
-        self.project_id = project_dict["project_id"]
-        self.lab_lead = project_dict["lab_lead"]
-        self.description = project_dict["description"]
-        self.notes = project_dict["notes"]
-    
-    def from_json(self):
-        pass
-
-    def to_dict(self):
-        pass
-
-class ProjectTable:
-    def __init__(self):
-        pass
-
-class ProjectPage:
-    def __init__(self):
-        pass
 
 @bp.route("/new_project", methods=("GET", "POST"))
 @bp.route("/project/<project_id>/update", methods=("GET", "POST"))

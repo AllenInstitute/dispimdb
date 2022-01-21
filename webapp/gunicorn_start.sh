@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-exec /home/samk/acworkflow/acenv/bin/gunicorn run:app \
-    --name "acworkflow" \
+exec /home/samk/dispimdb/env/bin/gunicorn run:app \
+    --name "webapp" \
     --workers 2 \
     --timeout 120 \
     --bind 0.0.0.0:8085 \
