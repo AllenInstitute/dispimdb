@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
+from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class StartAcquisitionModel(BaseModel):
@@ -7,9 +9,9 @@ class StartAcquisitionModel(BaseModel):
     session_id: str = Field(...)
     specimen_id: str = Field(...)
     scope: str = Field(...)
-    data_location: dict = Field(...)
-    acquisition_metadata: dict = Field(...)
-    acquisition_time_utc: str = Field(...)
+    data_location: Optional[dict] = Field({})
+    acquisition_metadata: Optional[dict] = Field({})
+    acquisition_time_utc: datetime = Field(...)
 
     class Config:
         schema_extra = {
