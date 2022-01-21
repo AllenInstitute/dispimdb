@@ -51,6 +51,27 @@ class DispimDBMongo:
     def find_one_and_update(self, collection, *args, **kwargs):
         return self._database[collection].find_one_and_update(*args, **kwargs)
 
+    @_mongoclient_retry
+    def create_indexes(self, collection, *args, **kwargs):
+        return self._database[collection].create_indexes(*args, **kwargs)
+
+    collection_indices = {
+        "acquisitions": [
+            pymongo.IndexModel(
+                [("acquisition_id", pymongo.ASCENDING)],
+                unique=True),
+        ],
+    }
+
+    def add_document(self, collection, *args, **kwargs):
+        try:
+            self.create_indexes(
+                collection,
+                self.collection_indices[collection])
+        except KeyError:
+            pass
+        return self.insert_one(collection, *args, **kwargs)
+
 
 dispimdb_mongo = DispimDBMongo(DATABASE_URI, DATABASE_NAME)
 

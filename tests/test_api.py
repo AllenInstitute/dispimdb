@@ -24,6 +24,20 @@ def test_create_acquisition(mongo_delete_acq_after, good_acquisitions):
                 acquisition['acquisition_id'])
 
 
+def test_create_acquisition_exists(databased_good_acquisitions):
+    acquisition = databased_good_acquisitions[-1]
+
+    acquisition_url = "api/new_acquisition"
+
+    excluded_fields = {"acquisition_id", "_id"}
+    post_acq = copy.deepcopy(
+        {k: acquisition[k] for k in acquisition.keys() - excluded_fields})
+
+    response = client.post(acquisition_url, json=post_acq)
+
+    assert response.status_code == 409
+
+
 def test_get_acquisitions(
         mongo_insert_delete_acq, good_acquisitions, specimen_id):
     acq_list = []
