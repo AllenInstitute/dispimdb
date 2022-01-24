@@ -61,7 +61,7 @@ def test_get_acquisition(mongo_insert_delete_acq, good_acquisitions):
 def test_put_data_location(mongo_insert_delete_acq, good_acquisitions):
     n5_directory = {
         'name': 'my_n5_dir',
-        'status': 'STARTED'
+        'status': 'CREATING'
     }
 
     for acquisition in good_acquisitions:
@@ -85,7 +85,7 @@ def test_put_data_location(mongo_insert_delete_acq, good_acquisitions):
 def test_patch_data_location_status(
         mongo_insert_delete_acq, good_acquisitions):
     data_key = 'tiff_directory'
-    new_state = 'IN_PROGRESS'
+    new_state = 'COMPLETE'
 
     for acquisition in good_acquisitions:
         if '_id' in acquisition:

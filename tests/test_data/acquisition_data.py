@@ -24,7 +24,7 @@ acq_good_doc = [
         'data_location': {
             'tiff_directory': {
                 'name': 'my_dir',
-                'status': 'STARTED',
+                'status': 'CREATING',
             }
         }
     },
@@ -38,7 +38,7 @@ acq_good_doc = [
         'data_location': {
             'tiff_directory': {
                 'name': 'H17_B4_S3_16x_0.5xPBS_overview_25um_step_size_1000um_delta_y',
-                'status': 'STARTED'
+                'status': 'CREATING'
             }
         },
     },
@@ -52,7 +52,7 @@ acq_good_doc = [
         'data_location': {
             'tiff_directory': {
                 'name': 'tiff2',
-                'status': 'STARTED'
+                'status': 'CREATING'
             }
         }
     }
@@ -67,16 +67,6 @@ acq_bad_doc = [
     ({}, 404),
     ({}, 404),
     ({}, 404)
-]
-
-acq_good_state_transitions = [
-    ['STARTED', 'IN_PROGRESS'],
-    ['IN_PROGRESS', 'COMPLETED'],
-    ['STARTED', 'ERROR']
-]
-acq_bad_state_transitions = [
-    ['STARTED', 'COMPLETED'],
-    ['COMPLETED', 'IN_PROGRESS']
 ]
 
 acq_good_query = []

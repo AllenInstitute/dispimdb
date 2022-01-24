@@ -56,7 +56,7 @@ def test_put_data_location(
     data_key = 'n5_directory'
     n5_directory = {
         'name': 'my_n5_dir',
-        'status': 'STARTED'
+        'status': 'CREATING'
     }
 
     for acq in databased_good_acquisitions:
@@ -72,7 +72,7 @@ def test_put_data_location(
 def test_patch_data_location_status(
         apiclient, databased_good_acquisitions):
     data_key = 'tiff_directory'
-    new_state = 'IN_PROGRESS'
+    new_state = 'COMPLETE'
 
     for acq in databased_good_acquisitions:
 
@@ -88,7 +88,7 @@ def test_patch_data_location_status(
 def test_bad_transition_patch_data_location_status(
         apiclient, databased_good_acquisitions):
     data_key = "tiff_directory"
-    new_state = "NOT_STARTED"
+    new_state = "DELETED"
 
     for acq in databased_good_acquisitions:
         with pytest.raises(Exception):
@@ -106,7 +106,7 @@ def test_bad_transition_patch_data_location_status(
 def test_bad_acquisition_patch_data_location_status(
         apiclient, databased_good_acquisitions):
     data_key = "tiff_directory"
-    new_state = "IN_PROGRESS"
+    new_state = "COMPLETE"
 
     acquisition_id = "not_an_acqid"
 
