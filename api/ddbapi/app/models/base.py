@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, Field
@@ -25,3 +26,17 @@ class DispimDbBase(BaseModel):
     added_by: datetime.datetime = Field(...)
     date_modified: datetime.datetime = Field(...)
     modified_by: datetime.datetime = Field(...)
+
+
+class MongoQueryModel(BaseModel):
+    filter: Optional[dict] = Field(None)
+    projection: Optional[dict] = Field(None)
+    skip: Optional[int] = Field(0)
+    limit: Optional[int] = Field(0)
+    sort: Optional[dict] = Field(None)
+    allow_partial_results: Optional[bool] = Field(False)
+    # batch_size
+    return_key: Optional[bool] = Field(None)
+    show_record_id: Optional[bool] = Field(None)
+    max_time_ms: Optional[int] = Field(None)
+    comment: Optional[str] = Field(None)
