@@ -92,7 +92,7 @@ def test_bad_transition_patch_data_location_status(
 
     for acq in databased_good_acquisitions:
         with pytest.raises(Exception):
-            rj = apiclient.acquisition.patch_status(
+            _ = apiclient.acquisition.patch_status(
                 acq['acquisition_id'],
                 data_key,
                 new_state
@@ -111,7 +111,7 @@ def test_bad_acquisition_patch_data_location_status(
     acquisition_id = "not_an_acqid"
 
     with pytest.raises(Exception):
-        rj = apiclient.acquisition.patch_status(
+        _ = apiclient.acquisition.patch_status(
             acquisition_id,
             data_key,
             new_state
@@ -125,7 +125,7 @@ def test_bad_state_patch_data_location_status(
 
     for acq in databased_good_acquisitions:
         with pytest.raises(Exception):
-            rj = apiclient.acquisition.patch_status(
+            _ = apiclient.acquisition.patch_status(
                 acq['acquisition_id'],
                 data_key,
                 new_state

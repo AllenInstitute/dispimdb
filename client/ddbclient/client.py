@@ -1,6 +1,5 @@
-import requests
-
 from ddbclient import acquisition
+
 
 class DispimDbClient:
     def __init__(self,
@@ -12,7 +11,7 @@ class DispimDbClient:
         self.hostname = hostname
         self.port = port
         self.subpath = subpath
-        
+
         self.acquisition = acquisition.AcquisitionClient(
             base_url=self.base_url,
             hostname=self.hostname,
