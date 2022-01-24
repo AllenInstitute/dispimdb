@@ -7,9 +7,10 @@ from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
 from typing import Any, Dict, Optional, List
 from starlette.status import HTTP_201_CREATED
+import pymongo
 
 from ddbapi.db.db import dispimdb_mongo
-from ddbapi.db.states import states, allowed_transitions
+from ddbapi.db.states import data_location_state_table
 from ddbapi.app.models.acquisition import (
     StartAcquisitionModel,
     UpdateAcquisitionModel
@@ -158,42 +159,44 @@ def patch_acquisition(acquisition_id: str,
         detail=f'Acquisition {acquisition_id} not found')
 '''
 
-@router.patch('/acquisition/{acquisition_id}/data_location/{data_key}/status/{state}',
+
+@router.patch(('/acquisition/{acquisition_id}/data_location/{data_key}'
+               '/status/{state}'),
               tags=["acquisitions"])
 def patch_data_location_status(acquisition_id: str,
                                data_key: str,
                                state: str):
 
-    acquisition = dispimdb_mongo.find_one(
+    update_field = f"data_location.{data_key}.status"
+    updated_acquisition = dispimdb_mongo.find_one_and_update(
         "acquisitions",
         {
-            "acquisition_id": acquisition_id
-        })
-
-    if not state in states:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'State {state} does not exist')
-
-    current_state = acquisition['data_location'][data_key]['status']
-    if not state in allowed_transitions[current_state]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'State transition not allowed')
-
-    update_field = f"data_location.{data_key}.status"
-    updated_doc = dispimdb_mongo.update_one(
-        "acquisitions",
-        {"acquisition_id": acquisition_id},
+            "acquisition_id": acquisition_id,
+            update_field: {
+                "$in": data_location_state_table.allowed_sources(state)
+            }
+        },
         {"$set": {update_field: state}},
+        return_document=pymongo.ReturnDocument.AFTER
     )
 
-    updated_acquisition = dispimdb_mongo.find_one(
-        "acquisitions",
-        {
-            "acquisition_id": acquisition_id
-        })
+    if updated_acquisition is None:
+        if state not in data_location_state_table.states:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'State {state} does not exist')
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(f"{acquisition_id} {data_key} cannot "
+                        f"transition to {state}")
+            )
+
     updated_acquisition.pop('_id')
-    return JSONResponse(status_code=status.HTTP_200_OK,
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
         content=updated_acquisition)
+
 
 @router.put("/acquisition/{acquisition_id}/data_location/{data_key}",
             tags=["acquisitions"])

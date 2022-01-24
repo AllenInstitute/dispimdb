@@ -47,6 +47,10 @@ class DispimDBMongo:
     def insert_one(self, collection, *args, **kwargs):
         return self._database[collection].insert_one(*args, **kwargs)
 
+    @_mongoclient_retry
+    def find_one_and_update(self, collection, *args, **kwargs):
+        return self._database[collection].find_one_and_update(*args, **kwargs)
+
 
 dispimdb_mongo = DispimDBMongo(DATABASE_URI, DATABASE_NAME)
 
