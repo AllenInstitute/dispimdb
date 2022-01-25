@@ -31,6 +31,17 @@ def test_post_acquisition(
         assert acq['acquisition_id'] == acq_id
 
 
+def test_post_acquisition_existing(
+        apiclient, databased_good_acquisitions):
+    acq = databased_good_acquisitions[0]
+    excluded_fields = {"acquisition_id", "_id"}
+    post_acq = copy.deepcopy(
+        {k: acq[k] for k in acq.keys() - excluded_fields})
+
+    with pytest.raises(Exception):
+        _ = apiclient.acquisition.post(post_acq)
+
+
 def test_get_acquisitions(
         apiclient, databased_good_acquisitions, specimen_id):
     acq_list = []

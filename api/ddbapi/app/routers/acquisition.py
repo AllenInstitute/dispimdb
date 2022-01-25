@@ -13,6 +13,9 @@ from ddbapi.app.models.acquisition import StartAcquisitionModel
 from ddbapi.app.models.base import MongoQueryModel
 
 
+router = APIRouter()
+
+
 def generate_acquisition_id(acquisition):
     dt = datetime.fromisoformat(
         acquisition['acquisition_time_utc'])
@@ -25,14 +28,6 @@ def generate_acquisition_id(acquisition):
     )))
 
 
-def acquisition_with_id(acquisition):
-    acq_id = generate_acquisition_id(acquisition)
-    return dict(acquisition, **{'_id': acq_id})
-
-
-router = APIRouter()
-
-
 @router.post('/new_acquisition',
              tags=['acquisitions'])
 def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
@@ -40,7 +35,7 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
 
     if not dispimdb_mongo.find_one(
             'specimens', {'specimen_id': acquisition['specimen_id']}):
-        dispimdb_mongo.insert_one(
+        dispimdb_mongo.add_document(
             "specimens",
             {
                 'specimen_id': acquisition['specimen_id']
@@ -48,7 +43,7 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
 
     if not dispimdb_mongo.find_one(
             "specimens", {'session_id': acquisition['session_id']}):
-        dispimdb_mongo.insert_one(
+        dispimdb_mongo.add_document(
             "sessions",
             {
                 'specimen_id': acquisition['specimen_id'],
@@ -57,8 +52,14 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
 
     acquisition['acquisition_id'] = generate_acquisition_id(acquisition)
 
-    new_acquisition = dispimdb_mongo.insert_one(
-        "acquisitions", acquisition)
+    try:
+        new_acquisition = dispimdb_mongo.add_document(
+            "acquisitions", acquisition)
+    except pymongo.errors.DuplicateKeyError as e:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot post acquisition: {e}"
+        )
 
     created_acquisition = dispimdb_mongo.find_one(
         "acquisitions",
