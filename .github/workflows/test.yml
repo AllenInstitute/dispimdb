@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.6.0
         with:
@@ -39,3 +39,10 @@ jobs:
 
       - name: Test with tox
         run: tox
+        env:
+          DISPIMDB_TEST_MONGODB_URI: mongodb://localhost:27017
+          DISPIMDB_TEST_MONGODB_DB: test_ddb
+          DISPIMDB_CLIENT_TEST_DISPIMDB_URL: http://127.0.0.1:5012
+          DISPIMDB_DATABASE_NAME: test_ddb
+          DISPIMDB_MONGODB_URI: mongodb://localhost:27017
+          TOX_TESTENV_PASSENV: "DISPIMDB_TEST_MONGODB_URI DISPIMDB_TEST_MONGODB_DB DISPIMDB_CLIENT_TEST_DISPIMDB_URL DISPIMDB_MONGODB_URI DISPIMDB_DATABASE_NAME"
