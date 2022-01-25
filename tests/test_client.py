@@ -66,7 +66,7 @@ def test_put_data_location(
         apiclient, databased_good_acquisitions):
     data_key = 'n5_directory'
     n5_directory = {
-        'name': 'my_n5_dir',
+        'uri': 'my_n5_dir',
         'status': 'CREATING'
     }
 
@@ -78,6 +78,29 @@ def test_put_data_location(
         )
 
         assert data_key in response_json['data_location']
+
+
+def test_put_existing_data_location(
+        apiclient, databased_good_acquisitions):
+    acq = databased_good_acquisitions[-1]
+
+    acq_id = acq['acquisition_id']
+    location_key, location_dict = next(iter(
+        acq["data_location"].items()))
+
+    updated_dict = copy.deepcopy(dict(
+        location_dict, **{
+            "uri": location_dict["uri"] + "NOT"
+            }))
+
+    with pytest.raises(Exception):
+        _ = apiclient.acquisition.put_data_location(
+            acq_id,
+            location_key,
+            updated_dict
+        )
+    r = apiclient.acquisition.get(acq_id)
+    assert r["data_location"][location_key] == location_dict
 
 
 def test_patch_data_location_status(
