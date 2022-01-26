@@ -1,5 +1,7 @@
 import os
+
 import pymongo
+from retry.api import retry_call
 
 DATABASE_URI = os.environ.get(
     "DISPIMDB_MONGO_URI",
@@ -11,10 +13,9 @@ DATABASE_NAME = os.environ.get(
 
 def _mongoclient_retry(func):
     def _mongoclient_retry_wrap(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        except pymongo.errors.AutoReconnect:
-            return func(self, *args, **kwargs)
+        return retry_call(
+            func, fargs=(self, *args), fkwargs=kwargs,
+            exceptions=pymongo.errors.AutoReconnect)
     return _mongoclient_retry_wrap
 
 
@@ -61,23 +62,23 @@ class DispimDBMongo:
                 [("acquisition_id", pymongo.ASCENDING)],
                 unique=True),
         ],
-        # "specimens": [
-        #     pymongo.IndexModel(
-        #         [("specimen_id", pymongo.ASCENDING)],
-        #         unique=True),
-        # ],
-        # "sections": [
-        #     pymongo.IndexModel(
-        #         [("specimen_id", pymongo.ASCENDING),
-        #          ("section_num", pymongo.ASCENDING)],
-        #         unique=True),
-        # ],
-        # "sessions": [
-        #     pymongo.IndexModel(
-        #         [("specimen_id", pymongo.ASCENDING),
-        #          ("session_id", pymongo.ASCENDING)],
-        #         unique=True),
-        # ]
+        "specimens": [
+            pymongo.IndexModel(
+                [("specimen_id", pymongo.ASCENDING)],
+                unique=True),
+        ],
+        "sections": [
+            pymongo.IndexModel(
+                [("specimen_id", pymongo.ASCENDING),
+                 ("section_num", pymongo.ASCENDING)],
+                unique=True),
+        ],
+        "sessions": [
+            pymongo.IndexModel(
+                [("specimen_id", pymongo.ASCENDING),
+                 ("session_id", pymongo.ASCENDING)],
+                unique=True),
+        ]
     }
 
     def add_document(self, collection, *args, **kwargs):
