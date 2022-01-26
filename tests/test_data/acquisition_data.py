@@ -15,7 +15,7 @@ def generate_acquisition_id(acquisition):
 
 acq_good_doc = [
     {
-        'section_num': 5,
+        'section_num': "5",
         'session_id': '091721',
         'specimen_id': '123456',
         'scope': 'ispim2',
@@ -29,7 +29,7 @@ acq_good_doc = [
         }
     },
     {
-        'section_num': 5,
+        'section_num': "5",
         'session_id': '091721',
         'specimen_id': '123456',
         'scope': 'ispim2',
@@ -43,7 +43,7 @@ acq_good_doc = [
         },
     },
     {
-        'section_num': 6,
+        'section_num': "6",
         'session_id': '091721',
         'specimen_id': '123456',
         'scope': 'ispim2',
