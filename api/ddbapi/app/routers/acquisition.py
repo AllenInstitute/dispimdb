@@ -3,7 +3,6 @@ from datetime import datetime
 from fastapi import APIRouter, Body, HTTPException, status
 from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
-from typing import Any, Dict
 from starlette.status import HTTP_201_CREATED
 import pymongo
 
@@ -35,29 +34,30 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
     acquisition = jsonable_encoder(acquisition)
 
     specimen_dict = {'specimen_id': acquisition['specimen_id']}
-    if not dispimdb_mongo.find_one(
-            'specimens', specimen_dict):
+    try:
         dispimdb_mongo.add_document(
             "specimens", specimen_dict)
+    except pymongo.errors.DuplicateKeyError:
+        pass
 
     session_dict = {
         **specimen_dict,
         **{"session_id": acquisition["session_id"]}}
-    if not dispimdb_mongo.find_one(
-            "sessions", session_dict):
+    try:
         dispimdb_mongo.add_document(
-            "sessions",
-            session_dict)
+            "sessions", session_dict)
+    except pymongo.errors.DuplicateKeyError:
+        pass
 
     section_dict = {
         **specimen_dict,
         **{"section_num": acquisition["section_num"]}
     }
-    if not dispimdb_mongo.find_one(
-            "sections", section_dict):
+    try:
         dispimdb_mongo.add_document(
-            "sections",
-            section_dict)
+            "sections", section_dict)
+    except pymongo.errors.DuplicateKeyError:
+        pass
 
     acquisition['acquisition_id'] = generate_acquisition_id(acquisition)
 

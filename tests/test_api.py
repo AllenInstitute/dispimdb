@@ -30,6 +30,9 @@ def test_create_and_get_acquisition(mongo_delete_acq_generated_after,
                                     good_acquisitions):
     post_url = posixpath.join('api', 'new_acquisition')
     get_specimens_url = "api/specimens"
+
+    expected_specimen_ids = {
+        a["specimen_id"] for a in good_acquisitions}
     for acquisition in good_acquisitions:
         specimen_id = acquisition["specimen_id"]
         session_id = acquisition["session_id"]
@@ -49,6 +52,7 @@ def test_create_and_get_acquisition(mongo_delete_acq_generated_after,
             s["specimen_id"] for s in client.get(
                 get_specimens_url).json()]
         assert specimen_id in db_specimen_ids
+        assert len(db_specimen_ids) <= len(expected_specimen_ids)
 
         get_sessions_url = f"api/specimen/{specimen_id}/sessions"
 
