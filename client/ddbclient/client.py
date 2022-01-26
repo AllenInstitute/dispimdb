@@ -13,12 +13,6 @@ class DispimDbClient:
         self.port = port
         self.subpath = subpath
 
-        # self.acquisition = acquisition.AcquisitionClient(
-        #     base_url=self.base_url,
-        #     hostname=self.hostname,
-        #     port=self.port,
-        #     subpath=self.subpath
-        # )
         self._register_client("acquisition", acquisition.AcquisitionClient)
         self._register_client("specimen", specimen.SpecimenClient)
         self._register_client("session", session.SessionClient)
