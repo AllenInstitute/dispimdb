@@ -61,6 +61,23 @@ class DispimDBMongo:
                 [("acquisition_id", pymongo.ASCENDING)],
                 unique=True),
         ],
+        # "specimens": [
+        #     pymongo.IndexModel(
+        #         [("specimen_id", pymongo.ASCENDING)],
+        #         unique=True),
+        # ],
+        # "sections": [
+        #     pymongo.IndexModel(
+        #         [("specimen_id", pymongo.ASCENDING),
+        #          ("section_num", pymongo.ASCENDING)],
+        #         unique=True),
+        # ],
+        # "sessions": [
+        #     pymongo.IndexModel(
+        #         [("specimen_id", pymongo.ASCENDING),
+        #          ("session_id", pymongo.ASCENDING)],
+        #         unique=True),
+        # ]
     }
 
     def add_document(self, collection, *args, **kwargs):

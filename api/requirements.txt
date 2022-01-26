@@ -7,3 +7,4 @@ pymongo
 scipy
 uri-handler
 uvicorn
+retry
