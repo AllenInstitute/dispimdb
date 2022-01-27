@@ -48,6 +48,24 @@ def acquisitions(mongoclient_mongodb):
 
 
 @pytest.fixture(scope="function")
+def sessions(mongoclient_mongodb):
+    mongoclient, mongodb = mongoclient_mongodb
+    yield mongodb.sessions
+
+
+@pytest.fixture(scope="function")
+def sections(mongoclient_mongodb):
+    mongoclient, mongodb = mongoclient_mongodb
+    yield mongodb.sections
+
+
+@pytest.fixture(scope="function")
+def specimens(mongoclient_mongodb):
+    mongoclient, mongodb = mongoclient_mongodb
+    yield mongodb.specimens
+
+
+@pytest.fixture(scope="function")
 def good_acquisitions():
     return copy.deepcopy(acquisition_data.acq_good_doc)
 
@@ -70,6 +88,18 @@ def databased_good_acquisitions(acquisitions, good_acquisitions):
 def mongo_delete_acq_after(request, acquisitions):
     def teardown():
         acquisitions.drop()
+
+    request.addfinalizer(teardown)
+
+
+@pytest.fixture(scope="function")
+def mongo_delete_acq_generated_after(
+        request, acquisitions, sessions, sections, specimens):
+    def teardown():
+        acquisitions.drop()
+        sessions.drop()
+        sections.drop()
+        specimens.drop()
 
     request.addfinalizer(teardown)
 

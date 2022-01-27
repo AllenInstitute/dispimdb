@@ -11,7 +11,7 @@ class DataLocationModel(BaseModel):
 
 
 class StartAcquisitionModel(BaseModel):
-    section_num: int = Field(...)
+    section_num: str = Field(...)
     session_id: str = Field(...)
     specimen_id: str = Field(...)
     scope: str = Field(...)

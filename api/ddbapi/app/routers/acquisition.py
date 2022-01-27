@@ -34,22 +34,30 @@ def generate_acquisition_id(acquisition):
 def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
     acquisition = jsonable_encoder(acquisition)
 
+    specimen_dict = {'specimen_id': acquisition['specimen_id']}
     if not dispimdb_mongo.find_one(
-            'specimens', {'specimen_id': acquisition['specimen_id']}):
+            'specimens', specimen_dict):
         dispimdb_mongo.add_document(
-            "specimens",
-            {
-                'specimen_id': acquisition['specimen_id']
-            })
+            "specimens", specimen_dict)
 
+    session_dict = {
+        **specimen_dict,
+        **{"session_id": acquisition["session_id"]}}
     if not dispimdb_mongo.find_one(
-            "specimens", {'session_id': acquisition['session_id']}):
+            "sessions", session_dict):
         dispimdb_mongo.add_document(
             "sessions",
-            {
-                'specimen_id': acquisition['specimen_id'],
-                'session_id': acquisition['session_id']
-            })
+            session_dict)
+
+    section_dict = {
+        **specimen_dict,
+        **{"section_num": acquisition["section_num"]}
+    }
+    if not dispimdb_mongo.find_one(
+            "sections", section_dict):
+        dispimdb_mongo.add_document(
+            "sections",
+            section_dict)
 
     acquisition['acquisition_id'] = generate_acquisition_id(acquisition)
 
