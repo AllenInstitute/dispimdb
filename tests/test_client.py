@@ -15,12 +15,7 @@ def apiclient(ddbapi_endpoint_url):
 
 def test_post_acquisition(
         apiclient, good_acquisitions,
-        mongo_delete_acq_after,
-        # mongo_delete_sections_after,
-        # mongo_delete_specimens_after,
-        # mongo_delete_sessions_after
-        ):
-
+        mongo_delete_acq_generated_after):
     for acq in good_acquisitions:
         excluded_fields = {"acquisition_id", "_id"}
         post_acq = copy.deepcopy(
@@ -29,6 +24,35 @@ def test_post_acquisition(
         acq_id = apiclient.acquisition.post(post_acq)
 
         assert acq['acquisition_id'] == acq_id
+
+
+def test_post_acquisition_get_created(
+        apiclient, good_acquisitions,
+        mongo_delete_acq_generated_after):
+    ex_acq = good_acquisitions[0]
+    excluded_fields = {"acquisition_id", "_id"}
+    acq = copy.deepcopy(
+        {k: ex_acq[k] for k in ex_acq.keys() - excluded_fields})
+    specimen_id = acq["specimen_id"]
+    session_id = acq["session_id"]
+    section_num = acq["section_num"]
+    # get empty section, specimen, session
+    assert not apiclient.specimen.get_specimens()
+    assert not apiclient.section.get_sections_from_specimen(
+        specimen_id)
+    assert not apiclient.session.get_sessions_from_specimen(
+        specimen_id)
+
+    acq_id = apiclient.acquisition.post(acq)
+
+    assert (apiclient.specimen.get_specimen(specimen_id)["specimen_id"] ==
+            specimen_id)
+    assert (apiclient.session.get_session(
+                specimen_id, session_id)["session_id"] ==
+            session_id)
+    assert (apiclient.section.get_section(
+                specimen_id, section_num)["section_num"] ==
+            section_num)
 
 
 def test_post_acquisition_existing(
@@ -66,7 +90,7 @@ def test_put_data_location(
         apiclient, databased_good_acquisitions):
     data_key = 'n5_directory'
     n5_directory = {
-        'name': 'my_n5_dir',
+        'uri': 'my_n5_dir',
         'status': 'CREATING'
     }
 
@@ -78,6 +102,29 @@ def test_put_data_location(
         )
 
         assert data_key in response_json['data_location']
+
+
+def test_put_existing_data_location(
+        apiclient, databased_good_acquisitions):
+    acq = databased_good_acquisitions[-1]
+
+    acq_id = acq['acquisition_id']
+    location_key, location_dict = next(iter(
+        acq["data_location"].items()))
+
+    updated_dict = copy.deepcopy(dict(
+        location_dict, **{
+            "uri": location_dict["uri"] + "NOT"
+            }))
+
+    with pytest.raises(Exception):
+        _ = apiclient.acquisition.put_data_location(
+            acq_id,
+            location_key,
+            updated_dict
+        )
+    r = apiclient.acquisition.get(acq_id)
+    assert r["data_location"][location_key] == location_dict
 
 
 def test_patch_data_location_status(

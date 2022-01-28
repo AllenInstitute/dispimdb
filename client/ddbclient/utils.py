@@ -10,8 +10,8 @@ def post_json(url, data):
     return r.json()
 
 
-def get_json(url, query):
-    r = requests.get(url, query)
+def get_json(url, *args, **kwargs):
+    r = requests.get(url, *args, **kwargs)
     r.raise_for_status()
     return r.json()
 

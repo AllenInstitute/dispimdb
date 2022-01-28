@@ -1,15 +1,23 @@
+from datetime import datetime
+from typing import Optional, Dict
+
 from pydantic import BaseModel, Field
-from typing import Optional
+
+
+class DataLocationModel(BaseModel):
+    status: Optional[str] = Field(...)
+    uri: str = Field(...)
+    metadata: Optional[dict] = Field({})
 
 
 class StartAcquisitionModel(BaseModel):
-    section_num: int = Field(...)
+    section_num: str = Field(...)
     session_id: str = Field(...)
     specimen_id: str = Field(...)
     scope: str = Field(...)
-    data_location: dict = Field(...)
-    acquisition_metadata: dict = Field(...)
-    acquisition_time_utc: str = Field(...)
+    data_location: Optional[Dict[str, DataLocationModel]] = Field({})
+    acquisition_metadata: Optional[dict] = Field({})
+    acquisition_time_utc: datetime = Field(...)
 
     class Config:
         schema_extra = {

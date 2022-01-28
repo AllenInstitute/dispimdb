@@ -9,7 +9,8 @@ import pymongo
 
 from ddbapi.db.db import dispimdb_mongo
 from ddbapi.db.states import data_location_state_table
-from ddbapi.app.models.acquisition import StartAcquisitionModel
+from ddbapi.app.models.acquisition import (
+    StartAcquisitionModel, DataLocationModel)
 from ddbapi.app.models.base import MongoQueryModel
 
 
@@ -33,22 +34,30 @@ def generate_acquisition_id(acquisition):
 def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
     acquisition = jsonable_encoder(acquisition)
 
+    specimen_dict = {'specimen_id': acquisition['specimen_id']}
     if not dispimdb_mongo.find_one(
-            'specimens', {'specimen_id': acquisition['specimen_id']}):
+            'specimens', specimen_dict):
         dispimdb_mongo.add_document(
-            "specimens",
-            {
-                'specimen_id': acquisition['specimen_id']
-            })
+            "specimens", specimen_dict)
 
+    session_dict = {
+        **specimen_dict,
+        **{"session_id": acquisition["session_id"]}}
     if not dispimdb_mongo.find_one(
-            "specimens", {'session_id': acquisition['session_id']}):
+            "sessions", session_dict):
         dispimdb_mongo.add_document(
             "sessions",
-            {
-                'specimen_id': acquisition['specimen_id'],
-                'session_id': acquisition['session_id']
-            })
+            session_dict)
+
+    section_dict = {
+        **specimen_dict,
+        **{"section_num": acquisition["section_num"]}
+    }
+    if not dispimdb_mongo.find_one(
+            "sections", section_dict):
+        dispimdb_mongo.add_document(
+            "sections",
+            section_dict)
 
     acquisition['acquisition_id'] = generate_acquisition_id(acquisition)
 
@@ -163,34 +172,40 @@ def patch_data_location_status(acquisition_id: str,
             tags=["acquisitions"])
 def put_data_location(acquisition_id: str,
                       data_key: str,
-                      request: Dict[Any, Any]):
-    acquisition = dispimdb_mongo.find_one(
-        "acquisitions",
-        {
-            "acquisition_id": acquisition_id
-        })
-
-    if data_key in acquisition["data_location"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Data location already exists')
+                      location: DataLocationModel = Body(...)):
+    location_dict = jsonable_encoder(location)
 
     update_field = f"data_location.{data_key}"
-    _ = dispimdb_mongo.update_one(
-         "acquisitions",
-         {"acquisition_id": acquisition_id},
-         {"$set": {update_field: request}},
-    )
 
-    updated_acquisition = dispimdb_mongo.find_one(
+    updated_acquisition = dispimdb_mongo.find_one_and_update(
         "acquisitions",
         {
-            "acquisition_id": acquisition_id
-        })
-    updated_acquisition.pop('_id')
+            "acquisition_id": acquisition_id,
+            update_field: {"$exists": False}
+        },
+        {"$set": {update_field: location_dict}},
+        return_document=pymongo.ReturnDocument.AFTER
+    )
+
+    if updated_acquisition is None:
+        acquisition = dispimdb_mongo.find_one(
+            "acquisitions",
+            {"acquisition_id": acquisition_id})
+        if acquisition is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"acquisition {acquisition_id} not found"
+            )
+        else:
+            raise HTTPException(
+                status_code=409,
+                detail=f"acquisition {acquisition_id} has data key {data_key}"
+            )
+    _ = updated_acquisition.pop("_id")
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=updated_acquisition)
+        content=updated_acquisition
+    )
 
 
 @router.delete('/acquisition/{acquisition_id}',
