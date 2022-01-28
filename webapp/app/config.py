@@ -1,12 +1,17 @@
 import os
+
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+ENVIRON_DATABASE_URI = os.getenv("DISPIMDB_MONGO_URI")
+ENVIRON_DATABASE_NAME = os.getenv("DISPIMDB_DATABASE_NAME")
+
 
 class Config(object):
     DEBUG = False
     TESTING = False
     SECRET_KEY = 'dev'
-    DATABASE_URI = 'mongodb://localhost:27017'
-    DATABASE_NAME = 'dispimdb'
+    DATABASE_URI = ENVIRON_DATABASE_URI or 'mongodb://localhost:27017'
+    DATABASE_NAME = ENVIRON_DATABASE_NAME or 'dispimdb'
     #IMAGE_UPLOAD_PATH = '/home/samk/acworkflow_storage/images'
     IMAGE_UPLOAD_PATH = '/home/samk/images'
     IMAGE_URL = '/images'
@@ -28,4 +33,5 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    DATABASE_NAME = 'test_dispimdb'
+
+    DATABASE_NAME = 'dispimdb_test'
