@@ -33,18 +33,42 @@
           </form>
         </td>
         <td><a href="{{ url_for('tracker.session_view', session_id=session['session_id'], specimen_id=session['specimen_id']) }}">{{ session['session_id'] }}</a></td>
-        <td>{{ session['section_ids'] }}</td>
-        {% if session['imaging_date'] is string %}
-          <td>{{ session['imaging_date'] }}</td>
-        {% else %}
-          <td>{{ session['imaging_date'].strftime('%m/%d/%y') }}</td>
-        {% endif %}
-        <td>{{ session['scope'] }}</td>
-        <td>{{ session['objective'] }}</td>
-        <td>{{ session['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }} 
-          by {% if 'added_by' in session %}{{ session['added_by'] }}{% endif %}</td>
-        <td>{{ session['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }} 
-          by {% if 'last_modified_by' in session %}{{ session['last_modified_by'] }}{% endif %}</td>
+        <td>
+          {% if 'section_ids' in session %}
+            {{ session['section_ids'] }}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'imaging_date' in session %}
+            {% if session['imaging_date'] is string %}
+              {{ session['imaging_date'] }}
+            {% else %}
+              {{ session['imaging_date'].strftime('%m/%d/%y') }}
+            {% endif %}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'scope' in session %}
+            {{ session['scope'] }}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'objective' in session %}
+            {{ session['objective'] }}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'date_added' in session %}
+            {{ session['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }} 
+            by {% if 'added_by' in session %}{{ session['added_by'] }}{% endif %}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'last_modified' in session %}
+            {{ session['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }} 
+            by {% if 'last_modified_by' in session %}{{ session['last_modified_by'] }}{% endif %}
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
     </tbody>
