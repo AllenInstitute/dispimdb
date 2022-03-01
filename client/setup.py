@@ -4,6 +4,10 @@ from setuptools import setup
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
 
+req_fn = HERE / "requirements.txt"
+with open(req_fn, "r") as f:
+    requirements = [ln.strip() for ln in f.readlines()]
+
 # The text of the README file
 README = (HERE / "README.md").read_text()
 
@@ -19,6 +23,5 @@ setup(
     author_email="samrkinn@gmail.com",
     packages=["ddbclient"],
     include_package_data=True,
-    install_requires=[
-        "requests"],
+    install_requires=requirements,
 )

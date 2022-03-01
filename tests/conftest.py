@@ -1,136 +1,125 @@
-import pytest
-from test_data.specimen_data import specimen_good_data
-from test_data.acquisition_data import acquisition_good_data
-from test_data.section_data import section_good_data
-from test_data.session_data import session_good_data
+import contextlib
+import copy
+import os
+import posixpath
 
 import pymongo
+import pytest
 
-client = pymongo.MongoClient('mongodb://localhost:27017')
-db = client['dispimdb']
+from .dummy_ddbapi_server import run_dummy_server
+from .test_data import acquisition_data
 
-@pytest.fixture(scope="function")
-def mongo_delete_specimens(request):
-    specimens = db.specimens
+mongo_uri = os.getenv(
+        "DISPIMDB_TEST_MONGODB_URI",
+        "mongodb://localhost:27017")
+mongo_db = os.getenv(
+        "DISPIMDB_TEST_MONGODB_DB",
+        "dispimdb_test_db")
+ddbapi_test_url = os.getenv(
+    "DISPIMDB_CLIENT_TEST_DISPIMDB_URL",
+    "http://127.0.0.1:5001/")
 
-    def teardown():
-        for specimen in specimen_good_data:
-            specimens.delete_one({'specimen_id': specimen['specimen_id']})
-    
-    request.addfinalizer(teardown)
-
-@pytest.fixture(scope="session")
-def mongo_insert_specimens(request):
-    specimens = db.specimens
-    specimens.insert_many(specimen_good_data)
-
-    def teardown():
-        for specimen in specimen_good_data:
-            specimens.delete_one({'specimen_id': specimen['specimen_id']})
-    
-    request.addfinalizer(teardown)
-
-@pytest.fixture(scope="function")
-def mongo_delete_acquisitions(request):
-    acquisitions = db.acquisitions
-
-    def teardown():
-        for acquisition in acquisition_good_data:
-            acquisitions.delete_one({
-                'specimen_id': acquisition['specimen_id'],
-                'acquisition_id': acquisition['acquisition_id']
-            })
-    
-    request.addfinalizer(teardown)
 
 @pytest.fixture(scope="session")
-def mongo_insert_acquisitions(request):
-    acquisitions = db.acquisitions
-    acquisitions.insert_many(acquisition_good_data)
+def mongoclient_mongodb():
+    mongoclient = pymongo.MongoClient(mongo_uri)
+    db = mongoclient[mongo_db]
 
-    def teardown():
-        for acquisition in acquisition_good_data:
-            acquisitions.delete_one({
-                'specimen_id': acquisition['specimen_id'],
-                'acquisition_id': acquisition['acquisition_id']
-            })
-    
-    request.addfinalizer(teardown)
+    yield mongoclient, db
 
-@pytest.fixture(scope="function")
-def mongo_delete_sections(request):
-    sections = db.sections
-
-    def teardown():
-        for section in section_good_data:
-            sections.delete_one({
-                'specimen_id': section['specimen_id'],
-                'section_num': section['section_num']
-            })
-    
-    request.addfinalizer(teardown)
 
 @pytest.fixture(scope="session")
-def mongo_insert_sections(request):
-    sections = db.sections
-    sections.insert_many(section_good_data)
+def ddbapi_server_url(mongoclient_mongodb):
+    # mongoclient, mongodb = mongoclient, mongodb
+    with run_dummy_server(
+            ddbapi_test_url, mongo_uri, mongo_db) as server_url:
+        yield server_url
 
-    def teardown():
-        for section in section_good_data:
-            sections.delete_one({
-                'specimen_id': section['specimen_id'],
-                'section_num': section['section_num']
-            })
-    
-    request.addfinalizer(teardown)
-
-@pytest.fixture(scope="function")
-def mongo_delete_sessions(request):
-    sessions = db.sessions
-
-    def teardown():
-        for session in session_good_data:
-            sessions.delete_one({
-                'specimen_id': session['specimen_id'],
-                'session_id': session['session_id']
-            })
-    
-    request.addfinalizer(teardown)
 
 @pytest.fixture(scope="session")
-def mongo_insert_sessions(request):
-    sessions = db.sessions
-    sessions.insert_many(session_good_data)
+def ddbapi_endpoint_url(ddbapi_server_url):
+    yield posixpath.join(ddbapi_server_url, "api")
 
-    def teardown():
-        for session in session_good_data:
-            sessions.delete_one({
-                'specimen_id': session['specimen_id'],
-                'session_id': session['session_id']
-            })
-    
-    request.addfinalizer(teardown)
 
-@pytest.fixture()
-def my_name():
-    return "Sam Kinn".upper()
+@pytest.fixture(scope="function")
+def acquisitions(mongoclient_mongodb):
+    mongoclient, mongodb = mongoclient_mongodb
+    yield mongodb.acquisitions
 
-@pytest.fixture()
-def list_of_numbers():
-    return [1, 2, 3, 4]
 
-@pytest.fixture()
-def good_specimens():
-    return specimen_good_data
+@pytest.fixture(scope="function")
+def sessions(mongoclient_mongodb):
+    mongoclient, mongodb = mongoclient_mongodb
+    yield mongodb.sessions
 
-@pytest.fixture()
+
+@pytest.fixture(scope="function")
+def sections(mongoclient_mongodb):
+    mongoclient, mongodb = mongoclient_mongodb
+    yield mongodb.sections
+
+
+@pytest.fixture(scope="function")
+def specimens(mongoclient_mongodb):
+    mongoclient, mongodb = mongoclient_mongodb
+    yield mongodb.specimens
+
+
+@pytest.fixture(scope="function")
 def good_acquisitions():
-    return acquisition_good_data
+    return copy.deepcopy(acquisition_data.acq_good_doc)
+
+
+@contextlib.contextmanager
+def databased_collection(collection, items, drop_after=True):
+    collection.insert_many(copy.deepcopy(items))
+    yield
+    if drop_after:
+        collection.drop()
+
+
+@pytest.fixture(scope="function")
+def databased_good_acquisitions(acquisitions, good_acquisitions):
+    with databased_collection(acquisitions, good_acquisitions):
+        yield copy.deepcopy(good_acquisitions)
+
+
+@pytest.fixture(scope="function")
+def mongo_delete_acq_after(request, acquisitions):
+    def teardown():
+        acquisitions.drop()
+
+    request.addfinalizer(teardown)
+
+
+@pytest.fixture(scope="function")
+def mongo_delete_acq_generated_after(
+        request, acquisitions, sessions, sections, specimens):
+    def teardown():
+        acquisitions.drop()
+        sessions.drop()
+        sections.drop()
+        specimens.drop()
+
+    request.addfinalizer(teardown)
+
+
+@pytest.fixture(scope="function")
+def mongo_insert_delete_acq(request, acquisitions):
+    acquisitions = acquisitions
+    acquisitions.insert_many(acquisition_data.acq_good_doc)
+
+    def teardown():
+        acquisitions.drop()
+
+    request.addfinalizer(teardown)
+
 
 @pytest.fixture()
-def good_sections():
-    return section_good_data
+def bad_acquisitions():
+    return acquisition_data.acq_bad_doc
+
 
 @pytest.fixture()
-def good_sessions():
-    return session_good_data
+def specimen_id():
+    return acquisition_data.acq_good_doc[0]['specimen_id']
