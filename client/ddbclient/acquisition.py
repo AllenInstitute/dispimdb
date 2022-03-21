@@ -16,12 +16,6 @@ class AcquisitionClient(ddbclient.base.BaseClient):
     ----------
     base_url : str
         Base url of the api (e.g. http://bigkahuna.corp.alleninstitute.org/api)
-    hostname : str
-        Name of API host (e.g. http://bigkahuna.corp.alleninstitute.org)
-    port : str
-        Port number for API (e.g. 8000)
-    subpath : str
-        Specifies path to api and version (e.g. 'api/v1')
 
     Methods
     -------

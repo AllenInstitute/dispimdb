@@ -3,15 +3,8 @@ from ddbclient import (
 
 
 class DispimDbClient:
-    def __init__(self,
-                 base_url=None,
-                 hostname=None,
-                 port=None,
-                 subpath=None):
+    def __init__(self, base_url=None):
         self.base_url = base_url
-        self.hostname = hostname
-        self.port = port
-        self.subpath = subpath
 
         self._register_client("acquisition", acquisition.AcquisitionClient)
         self._register_client("specimen", specimen.SpecimenClient)
@@ -20,8 +13,5 @@ class DispimDbClient:
 
     def _register_client(self, client_name, client_class):
         client_obj = client_class(**{
-            "base_url": self.base_url,
-            "hostname": self.hostname,
-            "port": self.port,
-            "subpath": self.subpath})
+            "base_url": self.base_url})
         setattr(self, client_name, client_obj)
