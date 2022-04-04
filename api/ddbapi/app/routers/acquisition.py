@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Body, HTTPException, status
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import Response
 from fastapi.encoders import jsonable_encoder
 from typing import Any, Dict
 from starlette.status import HTTP_201_CREATED
@@ -12,6 +12,7 @@ from ddbapi.db.states import data_location_state_table
 from ddbapi.app.models.acquisition import (
     StartAcquisitionModel, DataLocationModel)
 from ddbapi.app.models.base import MongoQueryModel
+from ddbapi.app.utils import AppJSONResponse
 
 
 router = APIRouter()
@@ -77,7 +78,7 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
         })
     created_acquisition.pop('_id')
 
-    return JSONResponse(
+    return AppJSONResponse(
         status_code=HTTP_201_CREATED,
         content=created_acquisition)
 
@@ -121,7 +122,7 @@ def query_acquisitions(query: MongoQueryModel = Body(...)):
     query_dict = jsonable_encoder(query)
     try:
         results = dispimdb_mongo.find_list("acquisitions", **query_dict)
-        return JSONResponse(
+        return AppJSONResponse(
             status_code=200,
             content=results)
     except pymongo.errors.ExecutionTimeout:  # pragma: no cover
@@ -163,7 +164,7 @@ def patch_data_location_status(acquisition_id: str,
             )
 
     updated_acquisition.pop('_id')
-    return JSONResponse(
+    return AppJSONResponse(
         status_code=status.HTTP_200_OK,
         content=updated_acquisition)
 
@@ -202,7 +203,7 @@ def put_data_location(acquisition_id: str,
                 detail=f"acquisition {acquisition_id} has data key {data_key}"
             )
     _ = updated_acquisition.pop("_id")
-    return JSONResponse(
+    return AppJSONResponse(
         status_code=status.HTTP_200_OK,
         content=updated_acquisition
     )
