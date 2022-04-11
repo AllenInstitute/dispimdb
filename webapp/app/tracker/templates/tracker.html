@@ -2,12 +2,25 @@
 
 {% block header %}
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Specimen Tracker</a>
+    <a class="navbar-brand" href="{{ url_for('tracker.home') }}">Specimen Tracker</a>
     <div class="collapse navbar-collapse ms-auto">
       <ul class="navbar-nav mb-2 mb-md-0">
+        <li class="nac-item">
+          <a class="btn btn-primary btn-sm"
+            href="{{ url_for('tracker.specimen_overview') }}"
+            role="button" style="margin-left:10px">View All Specimens</a>
+        </li>
+
+        <li>
+          <a class="btn btn-primary btn-sm"
+            href="{{ url_for('tracker.project_overview') }}"
+            role="button" style="margin-left:20px">View All Projects</a>
+        </li>
+
         <li class="nav-item">
           <select name="projects" id="projects" class="form-select form-select-sm"
-            style="margin-left:10px">
+            style="margin-left:30px">
+            <option value=""></option>
             {% for project in project_list %}
               <option value="{{ project }}">{{ project }}</option>
             {% endfor %}
@@ -17,7 +30,7 @@
         <li class="nav-item">
           <a class="btn btn-primary btn-sm" id="project_button"
             href="{{ url_for('tracker.project_view', project_id='project_id') }}"
-            role="button" style="margin-left:20px">View Project</a>
+            role="button" style="margin-left:40px">View Project</a>
         </li>
       </ul>
     </div>
@@ -37,7 +50,6 @@
         project_url[project_url.length - 1] = selected_project;
         project_url = project_url.join("/");
         $('#project_button').attr('href', project_url);
-        console.log(project_url);
       });
     });
   </script>

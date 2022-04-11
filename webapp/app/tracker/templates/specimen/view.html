@@ -5,6 +5,12 @@
 {% endblock %}
 
 {% block content %}
+    <h2 class="text-secondary" style="padding:1%">
+        <a href="{{ url_for('tracker.project_view', project_id=specimen_dict['project_id']) }}" class="text-decoration-none link-secondary">{{ specimen_dict['project_id'] }}</a>
+        >
+        <a href="{{ url_for('tracker.specimen_view', specimen_id=specimen_dict['specimen_id']) }}" class="text-decoration-none link-secondary">{{ specimen_dict['specimen_id'] }}</a>
+    </h2>
+
     <div class="accordion accordion-flush">
         <div class="accordion-item">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#specimen_view">Specimen</button><br>
@@ -85,6 +91,12 @@
         <div class="accordion-item">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#section_table_div">Sections</button><br>
             <div class="collapse show" id="section_table_div">
+                <form action="{{ url_for('tracker.section_update', specimen_id=specimen_dict['specimen_id']) }}">
+                    <input type="submit" class="btn btn-primary btn-sm" value="Insert New Section" />
+                </form>
+                
+                <br>
+
                 {% include "section/table.html" %}
             </div>
         </div>
@@ -94,6 +106,12 @@
         <div class="accordion-item">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#session_table_div">Imaging Sessions</button><br>
             <div class="collapse show" id="session_table_div">
+                <form action="{{ url_for('tracker.session_update', specimen_id=specimen_dict['specimen_id']) }}">
+                    <input type="submit" class="btn btn-primary btn-sm" value="Insert New Imaging Session" />
+                </form>
+                
+                <br>
+
                 {% include "session/table.html" %}
             </div>
         </div>
