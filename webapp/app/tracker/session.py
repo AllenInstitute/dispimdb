@@ -25,7 +25,7 @@ from . import bp, project, section, specimen
 default_session = {
     "session_id": "",
     "specimen_id": "",
-    "section_ids": 0,
+    "section_ids": [],
     "imaging_date": "",
     "scope": "",
     "objective": "",
@@ -42,10 +42,9 @@ default_session = {
     "last_modified_by": ""
 }
 
-@bp.route("/new_session", methods=("GET", "POST"))
-@bp.route("/<specimen_id>/new_session", methods=("GET", "POST"))
-@bp.route("/<specimen_id>/session/<session_id>/update", methods=("GET", "POST"))
-def session_update(specimen_id=None, session_id=None):
+@bp.route("/sessions/update", methods=("GET", "POST"))
+@bp.route("/sessions/<session_id>/update", methods=("GET", "POST"))
+def session_update(session_id=None):
     db = get_db()
     sessions = db.sessions
     specimens = db.specimens
@@ -76,10 +75,7 @@ def session_update(specimen_id=None, session_id=None):
             "session_id": session_id
         })
     else:
-        session_dict = default_session.copy()
-    
-    if specimen_id is not None:
-        session_dict["specimen_id"] = specimen_id
+        session_dict = default_session
     
     if "duplicate" in request.args:
         session_dict["session_id"] = ""
@@ -149,8 +145,7 @@ def session_update(specimen_id=None, session_id=None):
                     except OSError:
                         print("cannot create ", uploaded_image)
 
-            return redirect(url_for("tracker.specimen_view",
-                                    specimen_id=session_dict["specimen_id"]))
+            return redirect(url_for("tracker.session_overview"))
 
     return render_template("session/update.html",
         session_dict=session_dict,
@@ -158,25 +153,18 @@ def session_update(specimen_id=None, session_id=None):
         dropdown_dict=dropdown_dict,
         session_config_list=session_config_list)
 
-@bp.route("/<specimen_id>/session/<session_id>/delete", methods=("GET", "POST"))
+@bp.route("/session/delete/<session_id>", methods=("GET", "POST"))
 @login_required
-def session_delete(specimen_id=None, session_id=None):
+def session_delete(session_id=None):
     db = get_db()
     sessions = db.sessions
 
-    session_dict = sessions.find_one({
-        "specimen_id": specimen_id,
-        "session_id": session_id
-    })
-
     result = sessions.delete_one({
-        "specimen_id": specimen_id,
         "session_id": session_id
     })
     print(result)
 
-    return redirect(url_for("tracker.specimen_view",
-                            specimen_id=session_dict["specimen_id"]))
+    return redirect(url_for("tracker.session_overview"))
 
 @bp.route("/session", methods=("GET", "POST"))
 @bp.route("/session/overview", methods=("GET", "POST"))
@@ -190,39 +178,30 @@ def session_overview():
     return render_template("session/overview.html",
         session_list=session_list)
 
-@bp.route("/<specimen_id>/session/<session_id>", methods=("GET", "POST"))
-def session_view(specimen_id=None, session_id=None):
+@bp.route("/session/view/<session_id>", methods=("GET", "POST"))
+def session_view(session_id=None):
     db = get_db()
     sessions = db.sessions
-    specimens = db.specimens
 
     session_dict = sessions.find_one({
-        "specimen_id": specimen_id,
         "session_id": session_id
     })
 
-    specimen_dict = specimens.find_one({
-        "specimen_id": session_dict["specimen_id"]
-    })
-    project_id = specimen_dict["project_id"]
-
-    thumbnail_dir = os.path.join("/images",
+    thumbnail_dir = os.path.join("images",
         session_dict["specimen_id"],
-        session_dict["session_id"],
-        "thumb_gif")
-    
-    thumbnail_fn = '/home/samk' + thumbnail_dir
+        session_dict["session_id"])
     
     try:
-        thumbnail_fn = os.listdir('/home/samk' + thumbnail_dir)[0]
-        thumbnail_path = thumbnail_dir + "/" + thumbnail_fn
+        thumbnail_fn = os.listdir(os.path.join(os.getcwd(),
+            "app", "static",
+            thumbnail_dir))[0]
+        thumbnail_path = os.path.join(thumbnail_dir, thumbnail_fn)
     except:
-        thumbnail_path = ''
-        
+        thumbnail_path = ""
+    
     return render_template("session/view.html",
         session_dict=session_dict,
-        thumbnail_path=thumbnail_path,
-        project_id=project_id)
+        thumbnail_path=thumbnail_path)
 
 def session_table(specimen_id=None):
     db = get_db()

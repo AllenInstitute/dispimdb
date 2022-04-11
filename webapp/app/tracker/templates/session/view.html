@@ -5,21 +5,15 @@
 {% endblock %}
 
 {% block content %}
-    <h2 class="text-secondary">
-        <a href="{{ url_for('tracker.project_view', project_id=project_id) }}" class="text-decoration-none link-secondary">{{ project_id }}</a>
-        >
-        <a href="{{ url_for('tracker.specimen_view', specimen_id=session_dict['specimen_id']) }}" class="text-decoration-none link-secondary">{{ session_dict['specimen_id'] }}</a>
-        >
-        <a href="{{ url_for('tracker.session_view', specimen_id=session_dict['specimen_id'], session_id=session_dict['session_id']) }}" class="text-decoration-none link-secondary">{{ session_dict['session_id'] }}</a>
-    </h2>
-
-    <img src="{{ thumbnail_path }}" alt="No thumbnail found"/><br><br>
+    {% if thumbnail_path|length > 0 %}
+        <img src="{{ url_for('static', filename=thumbnail_path) }}" alt="No thumbnail found"/><br><br>
+    {% endif %}
 
     <div class="accordion accordion-flush">
         <div class="accordion-item">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#session_view">Imaging Session</button><br>
             <div class="collapse show" id="specimen_view">
-                <form action="{{ url_for('tracker.session_update', specimen_id=session_dict['specimen_id'], session_id=session_dict['session_id']) }}">
+                <form action="{{ url_for('tracker.session_update', session_id=session_dict['session_id']) }}">
                     <input type="submit" class="btn btn-primary btn-sm" value="Edit" />
                 </form>
 
@@ -36,7 +30,7 @@
                     </tr>
                     <tr>
                         <td>Section IDs</td>
-                        <td>{{ session_dict['section_ids'] }}</td>
+                        <td>{{ session_dict['section_ids']|join(', ') }}</td>
                     </tr>
                     <tr>
                         <td>Imaging Date</td>
@@ -99,25 +93,14 @@
         <div class="accordion-item">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#session_viz_tools">Visualization Tools</button><br>
             <div class="collapse show" id="session_viz_tools">
-                <a class="btn btn-secondary btn-sm" href="{{ url_for('tasks.generate_gif',
-                    specimen_id='', section_num='', session_id='') }}" role="button">
-                    Convert to GIFs
-                </a>
+                <a class="btn btn-secondary btn-sm"
+                    href="{{ url_for('tasks.generate_gifs_ijm') }}" role="button">Convert to GIFs</a>
 
-                <a class="btn btn-secondary btn-sm" href="{{ url_for('tasks.convert_to_gif',
-                    specimen_id='', section_num='', session_id='') }}" role="button">
-                    Generate Overview GIF
-                </a>
+                <a class="btn btn-secondary btn-sm" href="#" role="button">Generate Overview GIF</a>
 
-                <a class="btn btn-secondary btn-sm" href="{{ url_for('tasks.convert_to_bdv',
-                    specimen_id='', section_num='', session_id='') }}" role="button">
-                    Generate BDV Files
-                </a>
+                <a class="btn btn-secondary btn-sm" href="#" role="button">Generate BDV Files</a>
 
-                <a class="btn btn-secondary btn-sm" href="{{ url_for('tasks.convert_to_n5',
-                    specimen_id='', section_num='', session_id='') }}" role="button">
-                    Generate N5 Files
-                </a>
+                <a class="btn btn-secondary btn-sm" href="#" role="button">Generate N5 Files</a>
             </div>
         </div>
     </div>

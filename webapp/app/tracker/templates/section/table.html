@@ -1,3 +1,9 @@
+<form action="{{ url_for('tracker.section_update') }}">
+  <input type="submit" class="btn btn-primary btn-sm" value="Insert New Section" />
+</form>
+
+<br>
+
 <div class="table-responsive">
   <table id="section_table" class="table table-striped table-hover" style="width:100%">
     <thead id="section_table_head" class="table-dark">
@@ -18,7 +24,7 @@
     {% for section in section_list %}
       <tr>
         <td>
-          <form action="{{ url_for('tracker.section_update', specimen_id=section['specimen_id'], section_num=section['section_num'], action='duplicate') }}">
+          <form action="{{ url_for('tracker.section_update', specimen_id=section['specimen_id'], section_num=section['section_num'], duplicate=True) }}">
             <input type="submit" class="btn btn-secondary btn-xs" value="Duplicate" />
           </form>
         </td>
@@ -33,38 +39,14 @@
           </form>
         </td>
         <td><a href="{{ url_for('tracker.section_view', specimen_id=section['specimen_id'], section_num=section['section_num']) }}">{{ section['section_num'] }}</a></td>
-        <td>
-          {% if 'cut_plane' in section %}
-            {{ section['cut_plane'] }}
-          {% endif %}
-        </td>
-        <td>
-          {% if 'thickness' in section %}
-            {{ section['thickness'] }}
-          {% endif %}
-        </td>
-        <td>
-          {% if 'prep_type' in section %}
-            {{ section['prep_type'] }}
-          {% endif %}
-        </td>
-        <td>
-          {% if 'fluorescent_labels' in section %}
-            {{ section['fluorescent_labels'] }}
-          {% endif %}
-        </td>
-        <td>
-          {% if 'date_added' in section %}
-            {{ section['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }} 
-            by {% if 'added_by' in section %}{{ section['added_by'] }}{% endif %}
-          {% endif %}
-        </td>
-        <td>
-          {% if 'last_modified' in section %}
-            {{ section['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }} 
-            by {% if 'last_modified_by' in section %}{{ section['last_modified_by'] }}{% endif %}
-          {% endif %}
-        </td>
+        <td>{{ section['cut_plane'] }}</td>
+        <td>{{ section['thickness'] }}</td>
+        <td>{{ section['prep_type'] }}</td>
+        <td>{{ section['fluorescent_labels'] }}</td>
+        <td>{{ section['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }} 
+          by {% if 'added_by' in section %}{{ section['added_by'] }}{% endif %}</td>
+        <td>{{ section['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }} 
+          by {% if 'last_modified_by' in section %}{{ section['last_modified_by'] }}{% endif %}</td>
       </tr>
     {% endfor %}
     </tbody>

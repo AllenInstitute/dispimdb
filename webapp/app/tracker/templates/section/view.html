@@ -5,16 +5,6 @@
 {% endblock %}
 
 {% block content %}
-    <h2 class="text-secondary">
-        <a href="{{ url_for('tracker.project_view', project_id=project_id) }}" class="text-decoration-none link-secondary">{{ project_id }}</a>
-        >
-        <a href="{{ url_for('tracker.specimen_view', specimen_id=section_dict['specimen_id']) }}" class="text-decoration-none link-secondary">{{ section_dict['specimen_id'] }}</a>
-        >
-        <a href="{{ url_for('tracker.section_view', specimen_id=section_dict['specimen_id'], section_num=section_dict['section_num']) }}" class="text-decoration-none link-secondary">{{ section_dict['section_num'] }}</a>
-    </h2>
-
-    <img src="{{ thumbnail_path }}" alt="No thumbnail found"/><br><br>
-
     <div class="accordion accordion-flush">
         <div class="accordion-item">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#section_view">Section</button><br>
@@ -77,75 +67,13 @@
         <br>
 
         <div class="accordion-item">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#update_table_div">Notes and Updates</button><br>
-            <div class="collapse show" id="session_table_div">
-                <table class="table table-responsive table-striped table-hover">
-                    <thead id="section_table_head" class="table-dark">
-                        <tr>
-                            <th scope="col">user</th>
-                            <th scope="col">datetime</th>
-                            <th scope="col">notes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for notes in notes_list %}
-                        <tr>
-                            <td>
-                                {{ notes['user'] }}
-                            </td>
-                            <td>
-                                {{ notes['datetime'] }}
-                            </td>
-                            <td>
-                                {{ notes['notes'] }}
-                            </td>
-                        </tr>
-                      {% endfor %}
-                      </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#image_table_div">Miscellaneuous Images</button><br>
-            <div class="collapse show" id="image_table_div">
-                <table class="table table-responsive table-striped table-hover">
-                    <thead id="section_table_head" class="table-dark">
-                        <tr>
-                            <th scope="col">image</th>
-                            <th scope="col">image_filename</th>
-                            <th scope="col">date_added</th>
-                            <th scope="col">notes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for image in image_list %}
-                        <tr>
-                            <td>
-                                <img src="{{ image['img_rel_path'] }}" style="width:128px;height:128px;" alt="No thumbnail found"/><br><br>
-                            </td>
-                            <td>
-                                <a href="{{ image['img_rel_path'] }}">{{ image['img_filename'] }}</a>
-                            </td>
-                            <td>
-                                <!-- Date added using datetime.mtime or whatever -->
-                            </td>
-                            <td>
-                                <!-- Blank field, got nada -->
-                            </td>
-                        </tr>
-                      {% endfor %}
-                      </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="accordion-item">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#session_table_div">Imaging Sessions</button><br>
             <div class="collapse show" id="session_table_div">
-                
+
             </div>
         </div>
+
+        <br>
 
         <div class="accordion-item">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#section_viz_tools">Visualization Tools</button><br>

@@ -19,7 +19,7 @@
 
       <label for="section_ids">Section IDs (use comma to separate)</label>
       <input name="section_ids" id="section_ids" class="form-control"
-        value="{{ session_dict['section_ids'] }}">
+        value="{{ session_dict['section_ids']|join(', ') }}">
 
       <label for="imaging_date">Imaging Date (mm/dd/yy)</label>
       <input name="imaging_date" id="imaging_date" class="form-control"

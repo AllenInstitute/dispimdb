@@ -30,51 +30,49 @@ default_specimen = {
 }
 
 specimen_form_config = {
-    "data_fields": {
-        "specimen_id": {
-            "display_name": "Specimen ID",
-            "field_type": "id_input"
-        },
-        "project_id": {
-            "display_name": "Project ID",
-            "field_type": "select"
-        },
-        "pedigree": {
-            "display_name": "Pedigree",
-            "field_type": "select_input"
-        },
-        "sex": {
-            "display_name": "Sex",
-            "field_type": "select"
-        },
-        "dob": {
-            "display_name": "Date of Birth",
-            "field_type": "input_date"
-        },
-        "perfusion_date": {
-            "display_name": "Perfusion Date",
-            "field_type": "input_date"
-        },
-        "perfusion_age": {
-            "display_name": "Perfusion Age",
-            "field_type": "input"
-        },
-        "perfusion_notes": {
-            "display_name": "Perfusion Notes",
-            "field_type": "textarea"
-        },
-        "experiment": {
-            "display_name": "Experiment",
-            "field_type": "select_input"
-        },
-        "status": {
-            "display_name": "Status",
-            "field_type": "select_input"
-        },
-        "notes": {
-            "display_name": "Notes",
-            "field_type": "textarea"
-        }
+    "specimen_id": {
+        "display_name": "Specimen ID",
+        "field_type": "id_input"
+    },
+    "project_id": {
+        "display_name": "Project ID",
+        "field_type": "select"
+    },
+    "pedigree": {
+        "display_name": "Pedigree",
+        "field_type": "select_input"
+    },
+    "sex": {
+        "display_name": "Sex",
+        "field_type": "select"
+    },
+    "dob": {
+        "display_name": "Date of Birth (mm/dd/yy)",
+        "field_type": "input_date"
+    },
+    "perfusion_date": {
+        "display_name": "Perfusion Date (mm/dd/yy)",
+        "field_type": "input_date"
+    },
+    "perfusion_age": {
+        "display_name": "Perfusion Age",
+        "field_type": "input"
+    },
+    "perfusion_notes": {
+        "display_name": "Perfusion Notes",
+        "field_type": "textarea"
+    },
+    "experiment": {
+        "display_name": "Experiment",
+        "field_type": "select_input"
+    },
+    "status": {
+        "display_name": "Status",
+        "field_type": "select_input"
+    },
+    "notes": {
+        "display_name": "Notes",
+        "field_type": "textarea"
     }
 }
 

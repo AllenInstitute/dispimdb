@@ -7,8 +7,6 @@ imageio
 gunicorn
 matplotlib
 numpy
-pillow
 pymongo
-requests
 scipy
 supervisor

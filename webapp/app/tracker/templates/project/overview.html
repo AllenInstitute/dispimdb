@@ -26,7 +26,7 @@
       </tr>
     </thead>
     <tbody>
-    {% for project in project_table_list %}
+    {% for project in project_list %}
       <tr>
         <td>
           <form action="{{ url_for('tracker.project_update', project_id=project['project_id'], duplicate=True) }}">
@@ -44,28 +44,12 @@
           </form>
         </td>
         <td><a href="{{ url_for('tracker.project_view', project_id=project['project_id']) }}">{{ project['project_id'] }}</a></td>
-        <td>
-          {% if 'lab_lead' in project %}
-            {{ project['lab_lead'] }}
-          {% endif %}
-        </td>
-        <td>
-          {% if 'description' in project %}
-            {{ project['description'] }}
-          {% endif %}
-        </td>
-        <td>
-          {% if 'date_added' in project %}
-            {{ project['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}
-            by {% if 'added_by' in project %}{{ project['added_by'] }}{% endif %}
-          {% endif %}
-        </td>
-        <td>
-          {% if 'last_modified' in project %}
-            {{ project['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}
-            by {% if 'last_modified_by' in project %}{{ project['last_modified_by'] }}{% endif %}
-          {% endif %}
-        </td>
+        <td>{{ project['lab_lead'] }}</td>
+        <td>{{ project['description'] }}</td>
+        <td>{{ project['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}
+          by {% if 'added_by' in project %}{{ project['added_by'] }}{% endif %}</td>
+        <td>{{ project['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}
+          by {% if 'last_modified_by' in project %}{{ project['last_modified_by'] }}{% endif %}</td>
       </tr>
     {% endfor %}
     </tbody>

@@ -10,7 +10,7 @@ def get_db():
             current_app.config['DATABASE_URI'],
             connect=False
         )
-        g.db = g.client[current_app.config['DATABASE_NAME']]
+        g.db = g.client['dispimdb']
     
     return g.db
 

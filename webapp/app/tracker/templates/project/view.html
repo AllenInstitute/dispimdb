@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('tracker.project_update', project_id=project_dict['project_id']) }}">
+    <form action="{{ url_for('tracker.project_update', project_id=project_json['project_id']) }}">
         <input type="submit" class="btn btn-primary btn-sm" value="Edit" />
     </form>
 
@@ -14,45 +14,39 @@
     <table class="table table-striped text-left">
         <tr>
             <td>Project ID</td>
-            <td>{{ project_dict['project_id'] }}</td>
+            <td>{{ project_json['project_id'] }}</td>
         </tr>
         <tr>
             <td>Lab Lead</td>
-            <td>{{ project_dict['lab_lead'] }}</td>
+            <td>{{ project_json['lab_lead'] }}</td>
         </tr>
         <tr>
             <td>Description</td>
-            <td>{{ project_dict['description'] }}</td>
+            <td>{{ project_json['description'] }}</td>
         </tr>
         <tr>
             <td>Notes</td>
-            <td>{{ project_dict['notes'] }}</td>
+            <td>{{ project_json['notes'] }}</td>
         </tr>
         <tr>
             <td>Added By</td>
-            <td>{{ project_dict['added_by'] }}</td>
+            <td>{{ project_json['added_by'] }}</td>
         </tr>
         <tr>
             <td>Date Added</td>
-            <td>{{ project_dict['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+            <td>{{ project_json['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
         </tr>
         <tr>
             <td>Last Modified By</td>
-            <td>{{ project_dict['modified_by'] }}</td>
+            <td>{{ project_json['modified_by'] }}</td>
         </tr>
         <tr>
             <td>Last Modified</td>
-            <td>{{ project_dict['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
+            <td>{{ project_json['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }}</td>
         </tr>
     </table>
 
     <hr>
-
-    <form action="{{ url_for('tracker.specimen_update', project_id=project_dict['project_id']) }}">
-        <input type="submit" class="btn btn-primary btn-sm" value="Insert New Specimen" />
-    </form>
-
-    <br>
 
     {% include "specimen/table.html" %}
 

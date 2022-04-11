@@ -19,11 +19,10 @@ from app.db import get_db, query_mongo
 from . import bp, session, project, section
 from .defaults import default_specimen, specimen_form_config
 
-@bp.route("/new_specimen", methods=("GET", "POST"))
-@bp.route("/<specimen_id>/update", methods=("GET", "POST"))
-@bp.route("/<project_id>/new_specimen", methods=("GET", "POST"))
+@bp.route("/specimens/update", methods=("GET", "POST"))
+@bp.route("/specimens/<specimen_id>/update", methods=("GET", "POST"))
 @login_required
-def specimen_update(project_id=None, specimen_id=None):
+def specimen_update(specimen_id=None):
     db = get_db()
     projects = db.projects
     specimens = db.specimens
@@ -46,10 +45,7 @@ def specimen_update(project_id=None, specimen_id=None):
             "specimen_id": specimen_id
         })
     else:
-        specimen_dict = default_specimen.copy()
-    
-    if project_id is not None:
-        specimen_dict["project_id"] = project_id
+        specimen_dict = default_specimen
     
     if "duplicate" in request.args:
         specimen_dict["specimen_id"] = ""
@@ -130,8 +126,7 @@ def specimen_update(project_id=None, specimen_id=None):
             
             print(result)
 
-            return redirect(url_for("tracker.project_view",
-                project_id=specimen_dict["project_id"]))
+            return redirect(url_for("tracker.specimen_overview"))
     
     return render_template("update.html",
         collection_name="Specimen",
@@ -139,32 +134,28 @@ def specimen_update(project_id=None, specimen_id=None):
         form_select_values=dropdown_dict,
         form_dict=specimen_form_config)
 
-@bp.route("/<specimen_id>/delete", methods=("GET", "POST"))
+@bp.route("/specimen/delete/<specimen_id>", methods=("GET", "POST"))
 @login_required
 def specimen_delete(specimen_id=None):
     db = get_db()
     specimens = db.specimens
-    
-    specimen_dict = specimens.find_one({
-        "specimen_id": specimen_id
-    })
 
     result = specimens.delete_one({
         "specimen_id": specimen_id
     })
     print(result)
 
-    return redirect(url_for("tracker.project_view",
-                            project_id=specimen_dict["project_id"]))
+    return redirect(url_for("tracker.specimen_overview"))
 
-@bp.route("/overview", methods=("GET", "POST"))
+@bp.route("/specimen", methods=("GET", "POST"))
+@bp.route("/specimen/overview", methods=("GET", "POST"))
 def specimen_overview():
     specimen_list = specimen_table()
     
     return render_template("specimen/overview.html",
         specimen_list=specimen_list)
 
-@bp.route("/<specimen_id>", methods=("GET", "POST"))
+@bp.route("/specimen/view/<specimen_id>", methods=("GET", "POST"))
 def specimen_view(specimen_id=None):
     db = get_db()
     specimens = db.specimens

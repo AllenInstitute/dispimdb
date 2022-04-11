@@ -1,4 +1,5 @@
-FROM python:3.7
+FROM ubuntu:20.04
+MAINTAINER Sam Kinn <samk@alleninstitute.org>
 
 ENV DEBIAN_FRONTEND noninteractive
 

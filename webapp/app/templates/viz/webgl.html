@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+    <canvas id="myViz" width="640" height="480"></canvas>
+
+    <script type="text/javascript">
+        function main() {
+            const canvas = document.querySelector("#myViz");
+            const gl = canvas.getContext("webgl");
+
+            if (gl == null) {
+                alert("Unable to initialize WebGL");
+                return;
+            }
+
+            const vsSource = `
+                attribute vec4 aVertexPosition;
+
+                uniform mat4 uModelViewMatrix;
+                uniform mat4 uProjectionMatrix;
+
+                void main() {
+                    gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+                }
+            `;
+
+            const fsSource = `
+                void main() {
+                    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+                }
+            `;
+
+            const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+
+            const programInfo = {
+                program: shaderProgram,
+                attribLocations: {
+                    vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+                },
+                uniformLocations: {
+                    projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+                    modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+                },
+            };
+
+            const buffers = initBuffers(gl);
+
+            drawScene(gl, programInfo, buffers);
+        }
+
+        window.onload = main
+    </script>
+{% endblock %}
