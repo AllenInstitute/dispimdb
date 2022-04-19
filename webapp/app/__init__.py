@@ -37,7 +37,7 @@ def create_app(test_config=None):
     # from . import tasks
     # app.register_blueprint(tasks.bp)
 
-    from . import viz
-    app.register_blueprint(viz.bp)
+    # from . import viz
+    # app.register_blueprint(viz.bp)
 
     return app
