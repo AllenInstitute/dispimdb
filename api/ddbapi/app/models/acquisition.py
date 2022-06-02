@@ -18,6 +18,7 @@ class StartAcquisitionModel(BaseModel):
     data_location: Optional[Dict[str, DataLocationModel]] = Field({})
     acquisition_metadata: Optional[dict] = Field({})
     acquisition_time_utc: datetime = Field(...)
+    qc_state: Optional[str] = Field(...)
 
     class Config:
         schema_extra = {
