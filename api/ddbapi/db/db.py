@@ -55,6 +55,10 @@ class DispimDBMongo:
     def create_indexes(self, collection, *args, **kwargs):
         return self._database[collection].create_indexes(*args, **kwargs)
 
+    @_mongoclient_retry
+    def aggregate(self, collection, *args, **kwargs):
+        return self._database[collection].aggregate(*args, **kwargs)
+
     collection_indices = {
         "acquisitions": [
             pymongo.IndexModel(

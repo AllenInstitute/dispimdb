@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Body, HTTPException, status
-from fastapi.responses import JSONResponse, Response
+from fastapi import APIRouter, Body, HTTPException, status, Query
+from fastapi.responses import Response
 from fastapi.encoders import jsonable_encoder
-from typing import Any, Dict
+from typing import Any, Dict, Optional, List
 from starlette.status import HTTP_201_CREATED
 import pymongo
 
@@ -12,6 +12,7 @@ from ddbapi.db.states import data_location_state_table
 from ddbapi.app.models.acquisition import (
     StartAcquisitionModel, DataLocationModel)
 from ddbapi.app.models.base import MongoQueryModel
+from ddbapi.app.utils import AppJSONResponse
 
 
 router = APIRouter()
@@ -77,7 +78,7 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
         })
     created_acquisition.pop('_id')
 
-    return JSONResponse(
+    return AppJSONResponse(
         status_code=HTTP_201_CREATED,
         content=created_acquisition)
 
@@ -121,7 +122,7 @@ def query_acquisitions(query: MongoQueryModel = Body(...)):
     query_dict = jsonable_encoder(query)
     try:
         results = dispimdb_mongo.find_list("acquisitions", **query_dict)
-        return JSONResponse(
+        return AppJSONResponse(
             status_code=200,
             content=results)
     except pymongo.errors.ExecutionTimeout:  # pragma: no cover
@@ -163,7 +164,7 @@ def patch_data_location_status(acquisition_id: str,
             )
 
     updated_acquisition.pop('_id')
-    return JSONResponse(
+    return AppJSONResponse(
         status_code=status.HTTP_200_OK,
         content=updated_acquisition)
 
@@ -202,7 +203,7 @@ def put_data_location(acquisition_id: str,
                 detail=f"acquisition {acquisition_id} has data key {data_key}"
             )
     _ = updated_acquisition.pop("_id")
-    return JSONResponse(
+    return AppJSONResponse(
         status_code=status.HTTP_200_OK,
         content=updated_acquisition
     )
@@ -223,3 +224,55 @@ def delete_acquisition(acquisition_id: str):
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail=f'Acquisition {acquisition_id} not found')
+
+
+@router.get("/acquisitions/data_locations_status", tags=["acquisitions"])
+def get_data_locations_status(
+        acquisition_ids: List[str]=Query(None),
+        statuses: List[str]=Query(None)):
+    # TODO not sure if this filter logic works
+    print("acq: ", acquisition_ids)
+
+    filter_obj = (
+        {"acquisition_id": {"$exists": True}} if acquisition_ids is None else
+        {"acquisition_id": {"$in": acquisition_ids}})
+    print(acquisition_ids)
+    print(filter_obj)
+    acq_loc_status_uri_objs = dispimdb_mongo.aggregate(
+        "acquisitions", [
+            {"$match": filter_obj},
+            {"$project": {
+                "data_location": {"$objectToArray": "$data_location"},
+                "acquisition_id": "$acquisition_id"
+            }},
+            {"$unwind": "$data_location"},
+            {"$match": {
+                "data_location.v.status": ({
+                    "$in": statuses} if statuses is not None
+                    else {"$exists": True})}},
+            {"$project": {
+                "_id": None,
+                "data_location": "$data_location.k",
+                "status": "$data_location.v.status",
+                "uri": "$data_location.v.uri",
+                "acquisition_id": "$acquisition_id"
+            }}
+    ])
+
+    acq_to_loc_to_status_uri = {}
+    for obj in acq_loc_status_uri_objs:
+        loc = obj["data_location"]
+        stat = obj["status"]
+        acq_id = obj["acquisition_id"]
+        uri = obj["uri"]
+        status_uri_d = {
+            "status": stat,
+            "uri": uri
+        }
+        try:
+            acq_to_loc_to_status_uri[acq_id][loc] = status_uri_d
+        except KeyError:
+            acq_to_loc_to_status_uri[acq_id] = {loc: status_uri_d}
+    return AppJSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=acq_to_loc_to_status_uri)

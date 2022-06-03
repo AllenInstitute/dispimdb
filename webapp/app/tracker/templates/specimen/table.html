@@ -1,9 +1,3 @@
-<form action="{{ url_for('tracker.specimen_update') }}">
-  <input type="submit" class="btn btn-primary btn-sm" value="Insert New Specimen" />
-</form>
-
-<br>
-
 <div class="table-responsive">
   <table id="specimen_table" class="table table-striped table-hover" style="width:100%">
     <thead id="specimen_table_head" class="table-dark">
@@ -40,23 +34,51 @@
           </form>
         </td>
         <td><a href="{{ url_for('tracker.specimen_view', specimen_id=specimen['specimen_id']) }}">{{ specimen['specimen_id'] }}</a></td>
-        <td>{{ specimen['pedigree'] }}</td>
-        <td>{{ specimen['experiment'] }}</td>
-        <td>{{ specimen['sex'] }}</td>
-        {% if specimen['dob'] is string %}
-          <td>{{ specimen['dob'] }}</td>
-        {% else %}
-          <td>{{ specimen['dob'].strftime('%m/%d/%y') }}</td>
-        {% endif %}
-        {% if specimen['perfusion_date'] is string %}
-          <td>{{ specimen['perfusion_date'] }}</td>
-        {% else %}
-          <td>{{ specimen['perfusion_date'].strftime('%m/%d/%y') }}</td>
-        {% endif %}
-        <td>{{ specimen['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }} 
-          by {% if 'added_by' in specimen %}{{ specimen['added_by'] }}{% endif %}</td>
-        <td>{{ specimen['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }} 
-          by {% if 'last_modified_by' in specimen %}{{ specimen['last_modified_by'] }}{% endif %}</td>
+        <td>
+          {% if 'pedigree' in specimen %}
+            {{ specimen['pedigree'] }}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'experiment' in specimen %}
+            {{ specimen['experiment'] }}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'sex' in specimen %}
+            {{ specimen['sex'] }}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'dob' in specimen %}
+            {% if specimen['dob'] is string %}
+              {{ specimen['dob'] }}
+            {% else %}
+              {{ specimen['dob'].strftime('%m/%d/%y') }}
+            {% endif %}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'perfusion_date' in specimen %}
+            {% if specimen['perfusion_date'] is string %}
+              {{ specimen['perfusion_date'] }}
+            {% else %}
+              {{ specimen['perfusion_date'].strftime('%m/%d/%y') }}
+            {% endif %}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'date_added' in specimen %}
+            {{ specimen['date_added'].strftime('%m/%d/%y %I:%M:%S %p') }} 
+            by {% if 'added_by' in specimen %}{{ specimen['added_by'] }}{% endif %}
+          {% endif %}
+        </td>
+        <td>
+          {% if 'last_modified' in specimen %}
+            {{ specimen['last_modified'].strftime('%m/%d/%y %I:%M:%S %p') }} 
+            by {% if 'last_modified_by' in specimen %}{{ specimen['last_modified_by'] }}{% endif %}
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
     </tbody>

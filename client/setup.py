@@ -14,14 +14,15 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="ddbclient",
-    version="0.0.5",
+    use_scm_version={"root": "..", "relative_to": __file__},
     description="A wrapper for API calls to DispimDB",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/samrkinn/ddbclient",
-    author="Sam Kinn",
+    url="https://github.com/AllenInstitute/dispimdb",
+    author="Sam Kinn, Russel Torres",
     author_email="samrkinn@gmail.com",
     packages=["ddbclient"],
+    setup_requires=["setuptools_scm"],
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=requirements
 )

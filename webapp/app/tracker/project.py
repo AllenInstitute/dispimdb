@@ -16,7 +16,6 @@ from werkzeug.exceptions import abort
 from app.auth import login_required
 from app.db import get_db, query_mongo
 from app.forms import ProjectForm
-#from dispimdb import dispimdb
 
 from . import bp, session, section, specimen
 
@@ -86,40 +85,8 @@ project_data_config = {
     }
 }
 
-project_table_config = {
-
-}
-
-'''
-class ProjectCollection(dispimdb.DispimDbCollection):
-    def __init__(self):
-        pass
-'''
-
-class Project:
-    def __init__(self, project_dict=default_project):
-        self.form = ProjectForm()
-        self.project_id = project_dict["project_id"]
-        self.lab_lead = project_dict["lab_lead"]
-        self.description = project_dict["description"]
-        self.notes = project_dict["notes"]
-    
-    def from_json(self):
-        pass
-
-    def to_dict(self):
-        pass
-
-class ProjectTable:
-    def __init__(self):
-        pass
-
-class ProjectPage:
-    def __init__(self):
-        pass
-
-@bp.route("/projects/update", methods=("GET", "POST"))
-@bp.route("/projects/<project_id>/update", methods=("GET", "POST"))
+@bp.route("/new_project", methods=("GET", "POST"))
+@bp.route("/project/<project_id>/update", methods=("GET", "POST"))
 @login_required
 def project_update(project_id=None):
     db = get_db()
@@ -139,7 +106,7 @@ def project_update(project_id=None):
             "project_id": project_id
         })
     else:
-        project_dict = default_project
+        project_dict = default_project.copy()
     
     if "duplicate" in request.args:
         project_dict["project_id"] = ""
@@ -178,7 +145,7 @@ def project_update(project_id=None):
         collection_name="Project",
         form_values=project_dict,
         form_select_values=form_select_values,
-        form_dict=project_data_config)
+        form_config=project_data_config)
 
 @bp.route("/project/<project_id>/delete", methods=("GET", "POST"))
 @login_required
@@ -193,18 +160,18 @@ def project_delete(project_id=None):
 
     return redirect(url_for("tracker.project_overview"))
 
-#@bp.route("/project", methods=("GET", "POST"))
-#@bp.route("/project/overview", methods=("GET", "POST"))
+@bp.route("/project", methods=("GET", "POST"))
+@bp.route("/project/overview", methods=("GET", "POST"))
 def project_overview():
     db = get_db()
     projects = db.projects
 
-    project_list = query_project(projects)
-        
-    return render_template("project/overview.html",
-        project_list=project_list)
+    project_table_list = query_project(projects)
 
-@bp.route("/project/view/<project_id>", methods=("GET", "POST"))
+    return render_template("project/overview.html",
+        project_table_list=project_table_list)
+
+@bp.route("/project/<project_id>", methods=("GET", "POST"))
 def project_view(project_id=None):
     db = get_db()
     projects = db.projects
@@ -216,7 +183,7 @@ def project_view(project_id=None):
     specimen_list = specimen.specimen_table(project_id=project_id)
     
     return render_template("project/view.html",
-        project_json=project_dict,
+        project_dict=project_dict,
         specimen_list=specimen_list)
 
 def query_project(collection, filters=None):

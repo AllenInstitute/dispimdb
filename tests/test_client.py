@@ -8,8 +8,7 @@ from client.ddbclient import client
 @pytest.fixture(scope="session")
 def apiclient(ddbapi_endpoint_url):
     yield client.DispimDbClient(
-        base_url=ddbapi_endpoint_url,
-        subpath=""  # FIXME subpath currently required
+        base_url=ddbapi_endpoint_url
     )
 
 

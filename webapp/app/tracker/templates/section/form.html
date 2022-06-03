@@ -1,8 +1,9 @@
 <form method="post" enctype="multipart/form-data">
   <div class="form-group">
-    <label for="section_num">Section ID</label>
+    <label for="section_num">Section Nums (can enter multiple using commas and dashes, e.g. "1-3, 5")</label>
     <input name="section_num" id="section_num" class="form-control" 
-      value="{{ section_dict['section_num'] }}" required>
+      value="{{ section_dict['section_num'] }}" required
+      {% if section_dict['section_num'] != "" %}readonly{% endif %}>
 
     <label for="specimen_id">Specimen ID</label>
     <select name="specimen_id" id="specimen_id" class="form-control">
@@ -20,7 +21,7 @@
     <input name="cut_plane" id="cut_plane" class="form-control"
       value="{{ section_dict['cut_plane'] }}">
 
-    <label for="thickness">Thickness</label>
+    <label for="thickness">Thickness (specify units)</label>
     <input name="thickness" id="thickness" class="form-control"
       value="{{ section_dict['thickness'] }}">
 
