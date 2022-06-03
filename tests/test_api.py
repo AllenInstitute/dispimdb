@@ -1,6 +1,7 @@
 import copy
 import os
 import posixpath
+import urllib.parse
 
 from fastapi.testclient import TestClient
 
@@ -191,3 +192,27 @@ def test_delete_acquisition(mongo_insert_delete_acq, good_acquisitions):
 
         assert delete_response.status_code == 204
         assert get_response.status_code == 404
+
+
+def test_get_data_locations_status(databased_good_acquisitions):
+    url = "api/acquisitions/data_locations_status"
+    acquisitions_to_get = databased_good_acquisitions[:-1]
+    expected_acquisition_ids = [
+        acq["acquisition_id"] for acq in acquisitions_to_get]
+    params = {
+        "acquisition_ids": expected_acquisition_ids
+    }
+
+    q_str = urllib.parse.urlencode(params, doseq=True)
+
+    url = f"{url}?{q_str}"
+    r = client.get(url)
+    j = r.json()
+    assert not (j.keys() ^ {*expected_acquisition_ids})
+    for acq in acquisitions_to_get:
+        acq_id = acq["acquisition_id"]
+        datakeys_to_state_uri_d = j[acq_id]
+        assert not datakeys_to_state_uri_d.keys() ^ acq["data_location"].keys()
+        for datakey, state_uri_d in datakeys_to_state_uri_d.items():
+            assert acq["data_location"][datakey]["status"] == state_uri_d["status"]
+            assert  acq["data_location"][datakey]["uri"] == state_uri_d["uri"]
