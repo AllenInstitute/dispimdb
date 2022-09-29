@@ -216,3 +216,29 @@ def test_get_data_locations_status(databased_good_acquisitions):
         for datakey, state_uri_d in datakeys_to_state_uri_d.items():
             assert acq["data_location"][datakey]["status"] == state_uri_d["status"]
             assert  acq["data_location"][datakey]["uri"] == state_uri_d["uri"]
+
+
+def test_put_stitching_status(databased_good_acquisitions):
+    url_base = "api/acquisition/{acquisition_id}/update_fields"
+    stitching_status_dict = {"stitching_status": "STITCHING_COMPLETE"}
+    
+    for acq in databased_good_acquisitions:
+        acq_id = acq["acquisition_id"]
+        url = url_base.format(acquisition_id=acq_id)
+
+        r = client.put(url, json=stitching_status_dict)
+        j = r.json()
+        assert j["acquisition_id"] == acq_id
+        assert j["stitching_status"] == stitching_status_dict["stitching_status"]
+
+
+def test_put_unallowed_field(databased_good_acquisitions):
+    url_base = "api/acquisition/{acquisition_id}/update_fields"
+    input_dict = {"unallowed_field": "STITCHING_COMPLETE"}
+
+    acq = databased_good_acquisitions[0]
+    acq_id = acq["acquisition_id"]
+    url = url_base.format(acquisition_id=acq_id)
+    r = client.put(url, json=input_dict)
+    print(r.content)
+    assert r.status_code == 400

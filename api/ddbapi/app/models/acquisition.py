@@ -19,6 +19,7 @@ class StartAcquisitionModel(BaseModel):
     acquisition_metadata: Optional[dict] = Field({})
     acquisition_time_utc: datetime = Field(...)
     qc_state: Optional[str]
+    stitching_status: Optional[str]
 
     class Config:
         schema_extra = {
@@ -28,11 +29,12 @@ class StartAcquisitionModel(BaseModel):
 
 
 class UpdateAcquisitionModel(BaseModel):
-    acquisition_id: Optional[str]
-    section_num: Optional[int]
+    section_num: Optional[str]
     session_id: Optional[str]
     specimen_id: Optional[str]
     scope: Optional[str]
+    data_location: Optional[Dict[str, DataLocationModel]]
     acquisition_metadata: Optional[dict]
-    data_location: Optional[dict]
-    acquisition_time_utc: Optional[str]
+    acquisition_time_utc: Optional[datetime]
+    qc_state: Optional[str]
+    stitching_status: Optional[str]

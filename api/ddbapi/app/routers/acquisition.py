@@ -10,7 +10,7 @@ import pymongo
 from ddbapi.db.db import dispimdb_mongo
 from ddbapi.db.states import data_location_state_table
 from ddbapi.app.models.acquisition import (
-    StartAcquisitionModel, DataLocationModel)
+    StartAcquisitionModel, UpdateAcquisitionModel, DataLocationModel)
 from ddbapi.app.models.base import MongoQueryModel
 from ddbapi.app.utils import AppJSONResponse
 
@@ -129,6 +129,63 @@ def query_acquisitions(query: MongoQueryModel = Body(...)):
         return HTTPException(
             status_code=500,
             detail=f"querying timed out. query dict: {query_dict}")
+
+
+def field_updateable(field, updateable_fields):
+    # not overoptimized
+    for updateable_field in updateable_fields:
+        if updateable_field.startswith(field):
+            return True
+    return False
+
+
+@router.put('/acquisition/{acquisition_id}/update_fields', tags=["acquisitions"])
+def modify_fields(acquisition_id: str,
+                  allow_failures: bool = False,
+                  updates: dict = Body(...)):
+    # only allow updates on these fields (and mongo subfields)
+    updateable_fields = {"stitching_status"}
+
+    allowed_updates = {
+        field: value for field, value in updates.items()
+        if field_updateable(field, updateable_fields)}
+
+    # TODO marshal based on acquisition model
+
+    if updates.keys() - allowed_updates.keys():
+        if allow_failures:
+            # TODO log something
+            pass
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=("Updating keys {failed_keys} is not allowed".format(
+                    failed_keys=[*(updates.keys() - allowed_updates.keys())])))
+
+    updated_acquisition = dispimdb_mongo.find_one_and_update(
+        "acquisitions",
+        {
+            "acquisition_id": acquisition_id,
+        },
+        {"$set": allowed_updates},
+        return_document=pymongo.ReturnDocument.AFTER
+    )
+
+    if updated_acquisition is None:
+        acquisition = dispimdb_mongo.find_one(
+            "acquisitions",
+            {"acquisition_id": acquisition_id})
+        if acquisition is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"acquisition {acquisition_id} not found"
+            )
+
+    return AppJSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=updated_acquisition
+    )
+
 
 
 @router.patch(('/acquisition/{acquisition_id}/data_location/{data_key}'
