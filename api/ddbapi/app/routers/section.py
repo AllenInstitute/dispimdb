@@ -16,6 +16,16 @@ def get_sections(specimen_id: str):
         status_code=200,
         content=section_dicts)
 
+@router.get("/all_sections",
+            tags=["sections"])
+def get_all_sections():
+    section_dicts = dispimdb_mongo.find_list(
+        "sections", {}
+    )
+    return AppJSONResponse(
+        status_code=200,
+        content=section_dicts
+    )
 
 @router.get("/specimen/{specimen_id}/section/{section_num}",
             tags=["sections"])

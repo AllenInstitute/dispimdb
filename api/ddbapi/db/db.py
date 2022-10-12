@@ -6,7 +6,7 @@ DATABASE_URI = os.environ.get(
     'mongodb://localhost:27017')
 DATABASE_NAME = os.environ.get(
     "DISPIMDB_DATABASE_NAME",
-    "testdb")
+    "ddb_transfer_temp")
 
 
 def _mongoclient_retry(func):

@@ -82,6 +82,29 @@ def create_acquisition(acquisition: StartAcquisitionModel = Body(...)):
         status_code=HTTP_201_CREATED,
         content=created_acquisition)
 
+@router.get('/all/acquisitions',
+            tags=['acquisitions'])
+def get_all_acquisitions():
+    acquisition_objects = dispimdb_mongo.find_list(
+        "acquisitions",
+        {}, projection={
+            "_id": False,
+            "acquisition_id": True,
+            "acquisition_time_utc": True,
+            "section_num": True,
+            "session_id": True,
+            "specimen_id": True,
+            "scope": True,
+            "data_location": True,
+        }
+    )
+
+    if acquisition_objects:
+        return acquisition_objects
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f'No acquisitions found')
 
 @router.get('/{specimen_id}/acquisitions',
             tags=['acquisitions'])
@@ -101,6 +124,32 @@ def get_acquisitions(specimen_id: str):
         status_code=status.HTTP_404_NOT_FOUND,
         detail=f'No acquisitions found for specimen {specimen_id}')
 
+@router.get('/{specimen_id}/{section_num}/acquisitions',
+            tags=['acquisitions'])
+def get_acquisitions_by_section(specimen_id: str, section_num: str):
+    acquisition_objects = dispimdb_mongo.find_list(
+        "acquisitions",
+        {
+            'specimen_id': specimen_id,
+            'section_num': section_num,
+        }, projection={
+            "_id": False,
+            "acquisition_id": True,
+            "acquisition_time_utc": True,
+            "section_num": True,
+            "session_id": True,
+            "specimen_id": True,
+            "scope": True,
+            "data_location": True,
+        }
+    )
+
+    if acquisition_objects:
+        return acquisition_objects
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f'No acquisitions found')
 
 @router.get('/acquisition/{acquisition_id}',
             tags=['acquisitions'])
