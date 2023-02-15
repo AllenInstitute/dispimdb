@@ -1,5 +1,5 @@
 aiofiles
-fastapi
+fastapi[all]
 gunicorn
 numpy
 pydantic
